@@ -47,7 +47,6 @@ class SupplierAdmin(admin.ModelAdmin):
         }),
     )
     
-    
     # fieldsets = (
     #     ("ข้อมูลผู้ใช้งาน", {
     #         "fields": ("user_id",)
