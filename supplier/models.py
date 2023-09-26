@@ -10,7 +10,6 @@ class Supplier(models.Model):
     code = models.CharField(max_length=150, verbose_name="Code", unique=True, blank=False, null=False)
     name = models.CharField(max_length=150, verbose_name="Name", blank=False, null=False)
     description = models.TextField(verbose_name="Description", blank=True, default="-")
-    # description = HTMLField()
     is_active = models.BooleanField(verbose_name="Is Active", default=True)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
@@ -29,7 +28,6 @@ class Supplier(models.Model):
 class OrderType(models.Model):
     # select p.FCSKID,p.FCCODE,p.FCNAME,p.FCNAME2 from PRODTYPE p
     id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
-    skid = models.CharField(max_length=8, verbose_name="Formula ID", unique=True, blank=False, null=False)
     code = models.CharField(max_length=50, verbose_name="Code", unique=True, blank=False, null=False)
     name = models.CharField(max_length=150, verbose_name="Name", blank=False, null=False)
     description = models.TextField(verbose_name="Description", blank=True, default="-")
@@ -46,9 +44,8 @@ class OrderType(models.Model):
         verbose_name_plural = "Order Type"
         
 class ProductType(models.Model):
-    # select p.FCSKID,p.FCCODE,p.FCNAME,p.FCNAME2 from PRODTYPE p
+    # select p.FCCODE,p.FCNAME,p.FCNAME2 from PRODTYPE p
     id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
-    skid = models.CharField(max_length=8, verbose_name="Formula ID", unique=True, blank=False, null=False)
     code = models.CharField(max_length=50, verbose_name="Code", unique=True, blank=False, null=False)
     name = models.CharField(max_length=150, verbose_name="Name", blank=False, null=False)
     description = models.TextField(verbose_name="Description", blank=True, default="-")
@@ -67,8 +64,7 @@ class ProductType(models.Model):
 class Unit(models.Model):
     # select p.FCSKID,p.FCCODE,p.FCNAME,p.FCNAME2 from UM p
     id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
-    skid = models.CharField(max_length=8, verbose_name="Formula ID", unique=True, blank=False, null=False)
-    code = models.CharField(max_length=50, verbose_name="Code", unique=True, blank=False, null=False)
+    code = models.CharField(max_length=50, verbose_name="Code", blank=False, null=False)
     name = models.CharField(max_length=150, verbose_name="Name", blank=False, null=False)
     description = models.TextField(verbose_name="Description", blank=True, default="-")
     is_active = models.BooleanField(verbose_name="Is Active", default=True)
