@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 # Create your models here.
 class Supplier(models.Model):
     id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
-    user_id = models.ForeignKey(User, blank=True, verbose_name="User ID", on_delete=models.SET_NULL, null=True)
+    user_id = models.ManyToManyField(User, blank=True, verbose_name="User ID",null=True)
     skid = models.CharField(max_length=8, verbose_name="Formula ID", unique=True, blank=False, null=False)
     code = models.CharField(max_length=150, verbose_name="Code", unique=True, blank=False, null=False)
     name = models.CharField(max_length=150, verbose_name="Name", blank=False, null=False)

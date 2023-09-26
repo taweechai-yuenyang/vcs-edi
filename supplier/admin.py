@@ -20,7 +20,7 @@ class SupplierAdmin(admin.ModelAdmin):
         # 'skid',
         'code',
         'name',
-        'user_id',
+        # 'user_id',
         'description',
         'is_active',
         'created_at',
