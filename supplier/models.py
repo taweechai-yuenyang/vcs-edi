@@ -1,6 +1,5 @@
 import uuid
 from django.db import models
-from tinymce.models import HTMLField
 from django.contrib.auth.models import User
 
 # Create your models here.
@@ -10,8 +9,8 @@ class Supplier(models.Model):
     skid = models.CharField(max_length=8, verbose_name="Formula ID", unique=True, blank=False, null=False)
     code = models.CharField(max_length=150, verbose_name="Code", unique=True, blank=False, null=False)
     name = models.CharField(max_length=150, verbose_name="Name", blank=False, null=False)
-    # description = models.TextField(verbose_name="Description", blank=True, default="-")
-    description = HTMLField()
+    description = models.TextField(verbose_name="Description", blank=True, default="-")
+    # description = HTMLField()
     is_active = models.BooleanField(verbose_name="Is Active", default=True)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)

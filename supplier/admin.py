@@ -1,10 +1,20 @@
+from django import forms
+from django.forms import ModelForm
 from django.contrib import admin
+from django.contrib.admin import ModelAdmin
 from django.contrib.auth.models import Group
 from .models import Supplier
 
-# Register your models here.
+# # Register your models here.
+# class SupplierForm(ModelForm):
+#     description = forms.CharField(widget=CKEditorWidget())
+#     class Meta:
+#         model = Supplier
+#         fields = '__all__'
+
 class SupplierAdmin(admin.ModelAdmin):
     # change_list_template = "admin/change_list.html"
+    # form = SupplierForm
     
     list_display = (
         # 'skid',
