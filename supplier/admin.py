@@ -3,7 +3,7 @@ from django.forms import ModelForm
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
 from django.contrib.auth.models import Group
-from .models import Supplier
+from .models import Supplier, OrderType, ProductType, Unit, Product
 
 # # Register your models here.
 # class SupplierForm(ModelForm):
@@ -102,4 +102,20 @@ class SupplierAdmin(admin.ModelAdmin):
     
     pass
 
+class ProductTypeAdmin(admin.ModelAdmin):
+    pass
+
+class UnitAdmin(admin.ModelAdmin):
+    pass
+
+class ProductAdmin(admin.ModelAdmin):
+    pass
+
+class OrderTypeAdmin(admin.ModelAdmin):
+    pass
+
 admin.site.register(Supplier, SupplierAdmin)
+admin.site.register(ProductType, ProductTypeAdmin)
+admin.site.register(Unit, UnitAdmin)
+admin.site.register(Product, ProductAdmin)
+admin.site.register(OrderType, OrderTypeAdmin)

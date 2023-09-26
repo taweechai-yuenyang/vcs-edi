@@ -1,13 +1,9 @@
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import Supplier
-from .serializers import SupplierSerializer
+from .models import Supplier, OrderType, Product, ProductType, Unit
+from .serializers import SupplierSerializer,OrderTypeSerializer,ProductTypeSerializer,UnitSerializer,ProductSerializer
 
-
-# class SupplierViewSet(viewsets.ModelViewSet):
-#     queryset = Supplier.objects.all()
-#     serializer_class = SupplierSerializer
 
 class SupplierListApiView(APIView):
     # add permission to check if user is authenticated
@@ -21,12 +17,12 @@ class SupplierListApiView(APIView):
         # Supplier = Supplier.objects.filter(user = request.user.id)
         id = self.request.query_params.get('id')
         if id:
-            Supplier = Supplier.objects.get(id=id)
-            serializer = SupplierSerializer(Supplier)
+            obj = Supplier.objects.get(id=id)
+            serializer = SupplierSerializer(obj)
             return Response(serializer.data, status=status.HTTP_200_OK)
         
-        Supplier = Supplier.objects.all()
-        serializer = SupplierSerializer(Supplier, many=True)
+        obj = Supplier.objects.all()
+        serializer = SupplierSerializer(obj, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     # 2. Create
@@ -78,3 +74,137 @@ class SupplierListApiView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
         return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+class OrderTypeListApiView(APIView):
+    # add permission to check if user is authenticated
+    permission_classes = [permissions.IsAuthenticated]
+
+    # 1. List all
+    def get(self, request, *args, **kwargs):
+        '''
+        List all the todo items for given requested user
+        '''
+        # Supplier = Supplier.objects.filter(user = request.user.id)
+        id = self.request.query_params.get('id')
+        if id:
+            obj = OrderType.objects.get(id=id)
+            serializer = OrderTypeSerializer(obj)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        obj = OrderType.objects.all()
+        serializer = SupplierSerializer(obj, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    # 2. Create
+    def post(self, request, *args, **kwargs):
+        '''
+        Create the Todo with given todo data
+        '''
+        serializer = OrderTypeSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+class ProductTypeListApiView(APIView):
+    # add permission to check if user is authenticated
+    permission_classes = [permissions.IsAuthenticated]
+
+    # 1. List all
+    def get(self, request, *args, **kwargs):
+        '''
+        List all the todo items for given requested user
+        '''
+        # Supplier = Supplier.objects.filter(user = request.user.id)
+        id = self.request.query_params.get('id')
+        if id:
+            obj = ProductType.objects.get(id=id)
+            serializer = ProductTypeSerializer(obj)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        obj = ProductType.objects.all()
+        serializer = ProductTypeSerializer(obj, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    # 2. Create
+    def post(self, request, *args, **kwargs):
+        '''
+        Create the Todo with given todo data
+        '''
+        serializer = ProductTypeSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class UnitListApiView(APIView):
+    # add permission to check if user is authenticated
+    permission_classes = [permissions.IsAuthenticated]
+
+    # 1. List all
+    def get(self, request, *args, **kwargs):
+        '''
+        List all the todo items for given requested user
+        '''
+        # Supplier = Supplier.objects.filter(user = request.user.id)
+        id = self.request.query_params.get('id')
+        if id:
+            obj = Unit.objects.get(id=id)
+            serializer = UnitSerializer(obj)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        obj = Unit.objects.all()
+        serializer = ProductTypeSerializer(obj, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    # 2. Create
+    def post(self, request, *args, **kwargs):
+        '''
+        Create the Todo with given todo data
+        '''
+        serializer = UnitSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class ProductListApiView(APIView):
+    # add permission to check if user is authenticated
+    permission_classes = [permissions.IsAuthenticated]
+
+    # 1. List all
+    def get(self, request, *args, **kwargs):
+        '''
+        List all the todo items for given requested user
+        '''
+        # Supplier = Supplier.objects.filter(user = request.user.id)
+        id = self.request.query_params.get('id')
+        if id:
+            obj = Product.objects.get(id=id)
+            serializer = ProductSerializer(obj)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        obj = Product.objects.all()
+        serializer = ProductSerializer(obj, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    # 2. Create
+    def post(self, request, *args, **kwargs):
+        '''
+        Create the Todo with given todo data
+        '''
+        
+        pType = ProductType.objects.get(code=request.data.get('prod_type_id'))
+        request.data['prod_type_id'] = pType.id
+        print(request.data['prod_type_id'])
+        serializer = ProductSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

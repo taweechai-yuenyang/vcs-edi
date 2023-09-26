@@ -4,4 +4,4 @@ from django.apps import AppConfig
 class SupplierConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'supplier'
-    verbose_name = "จัดการข้อมูล Supplier"
+    verbose_name = "จัดการข้อมูลระบบ"
