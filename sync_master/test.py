@@ -1,7 +1,7 @@
 import pyodbc
 
 
-connection_string = str('Driver={ODBC Driver 17 for SQL Server};SERVER=192.168.20.9;DATABASE=Formula;UID=fm1234;PWD=x2y2;TrustServerCertificate=no;Encrypt=no')
+connection_string = str('Driver={ODBC Driver 17 for SQL Server};SERVER=192.168.20.9;DATABASE=Formula;UID=fm1234;PWD=x2y2;TrustServerCertificate=no;TrustServerCertificate=no;')
 # Establish a connection
 conn = pyodbc.connect(connection_string)
 SQL_QUERY = f"""select FCSKID,FCTYPE,FCCODE,FCNAME,FCNAME2 from PROD"""
