@@ -95,6 +95,6 @@ class Product(models.Model):
         return self.name
     
     class Meta:
-        db_table = "tbmProd"
-        verbose_name = "ข้อมูล Prod"
+        db_table = "tbmProduct"
+        verbose_name = "ข้อมูล Product"
         verbose_name_plural = "Product"
