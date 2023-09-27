@@ -103,15 +103,116 @@ class SupplierAdmin(admin.ModelAdmin):
     pass
 
 class ProductTypeAdmin(admin.ModelAdmin):
+    list_display = (
+        'code',
+        'name',
+        'description',
+        'is_active',
+        'created_at',
+        'updated_at',
+    )
+    
+    search_fields = (
+        'code',
+        'name',
+    )
+    
+    list_filter = ('is_active',)
+    
+    # ordering = ("code","name",)
+    list_per_page = 25
+    
+    def created_at(self, obj):
+        return obj.created_on.strftime("%d-%m-%Y %H:%M:%S")
+    
+    def updated_at(self, obj):
+        # return obj.updated_on.strftime("%d %b %Y %H:%M:%S")
+        return obj.updated_on.strftime("%d-%m-%Y %H:%M:%S")
     pass
 
 class UnitAdmin(admin.ModelAdmin):
+    list_display = (
+        'code',
+        'name',
+        'description',
+        'is_active',
+        'created_at',
+        'updated_at',
+    )
+    
+    search_fields = (
+        'code',
+        'name',
+    )
+    
+    list_filter = ('is_active',)
+    
+    # ordering = ("code","name",)
+    list_per_page = 25
+    
+    def created_at(self, obj):
+        return obj.created_on.strftime("%d-%m-%Y %H:%M:%S")
+    
+    def updated_at(self, obj):
+        # return obj.updated_on.strftime("%d %b %Y %H:%M:%S")
+        return obj.updated_on.strftime("%d-%m-%Y %H:%M:%S")
     pass
 
 class ProductAdmin(admin.ModelAdmin):
+    list_display = (
+        'prod_type_id',
+        'code',
+        'name',
+        'description',
+        'is_active',
+        'created_at',
+        'updated_at',
+    )
+    
+    search_fields = (
+        'code',
+        'name',
+    )
+    
+    list_filter = ('prod_type_id','is_active',)
+    
+    # ordering = ("code","name",)
+    list_per_page = 25
+    
+    def created_at(self, obj):
+        return obj.created_on.strftime("%d-%m-%Y %H:%M:%S")
+    
+    def updated_at(self, obj):
+        # return obj.updated_on.strftime("%d %b %Y %H:%M:%S")
+        return obj.updated_on.strftime("%d-%m-%Y %H:%M:%S")
     pass
 
 class OrderTypeAdmin(admin.ModelAdmin):
+    list_display = (
+        'code',
+        'name',
+        'description',
+        'is_active',
+        'created_at',
+        'updated_at',
+    )
+    
+    search_fields = (
+        'code',
+        'name',
+    )
+    
+    list_filter = ('is_active',)
+    
+    # ordering = ("code","name",)
+    list_per_page = 25
+    
+    def created_at(self, obj):
+        return obj.created_on.strftime("%d-%m-%Y %H:%M:%S")
+    
+    def updated_at(self, obj):
+        # return obj.updated_on.strftime("%d %b %Y %H:%M:%S")
+        return obj.updated_on.strftime("%d-%m-%Y %H:%M:%S")
     pass
 
 admin.site.register(Supplier, SupplierAdmin)

@@ -200,9 +200,10 @@ class ProductListApiView(APIView):
         '''
         
         pType = ProductType.objects.get(code=request.data.get('prod_type_id'))
-        request.data['prod_type_id'] = pType.id
-        print(request.data['prod_type_id'])
-        serializer = ProductSerializer(data=request.data)
+        obj = request.POST.copy()
+        obj['prod_type_id'] = pType.id
+        
+        serializer = ProductSerializer(data=obj)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)

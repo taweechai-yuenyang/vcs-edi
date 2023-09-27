@@ -10,19 +10,19 @@ class SupplierSerializer(serializers.ModelSerializer):
 class OrderTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderType
-        fields = ('id','skid','code','name','description','is_active','created_on','updated_on',)
+        fields = ('id','code','name','description','is_active','created_on','updated_on',)
         
 class ProductTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductType
-        fields = ('id','skid','code','name','description','is_active','created_on','updated_on',)
+        fields = ('id','code','name','description','is_active','created_on','updated_on',)
         
 class UnitSerializer(serializers.ModelSerializer):
     class Meta:
         model = Unit
-        fields = ('id','skid','code','name','description','is_active','created_on','updated_on',)
+        fields = ('id','code','name','description','is_active','created_on','updated_on',)
         
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ('id','prod_type_id','code','name','description','is_active','created_on','updated_on',)
+        fields = ('id','skid','prod_type_id','code','name','description','is_active','created_on','updated_on',)

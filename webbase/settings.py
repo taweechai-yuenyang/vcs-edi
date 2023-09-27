@@ -87,18 +87,36 @@ WSGI_APPLICATION = "webbase.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# DATABASES = {
+#     # "default": {
+#     #     "ENGINE": "django.db.backends.sqlite3",
+#     #     "NAME": BASE_DIR / "db.sqlite3",
+#     # }
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "OPTIONS": {
+#             "service": "edi_service",
+#         },
+#     }
+# }
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-    # "default": {
-    #     "ENGINE": "django.db.backends.postgresql",
-    #     "OPTIONS": {
-    #         "service": "edi_service",
-    #     },
-    # }
+    'default': {
+        'ENGINE': 'mssql',
+        'NAME': 'EDI',
+        'USER': 'fm1234',
+        'PASSWORD': 'x2y2',
+        'HOST': '192.168.20.9',
+        'PORT': '1433',
+        "Trusted_Connection": "no",
+        "OPTIONS": {
+            "driver": "ODBC Driver 17 for SQL Server",
+        },
+    },
 }
+
+# set this to False if you want to turn off pyodbc's connection pooling
+DATABASE_CONNECTION_POOLING = False
 
 
 # Password validation
@@ -277,7 +295,7 @@ JAZZMIN_SETTINGS = {
         "supplier.Supplier": "fas fa-users",
         "supplier.ProductType": "fas fa-users",
         "supplier.Unit": "fas fa-users",
-        "supplier.OrderType": "fas fa-users",
+        "supplier.OrderType": "fas fa-cogs",
         "supplier.Product": "fas fa-users",
         "order.OrderHead": "fas fa-users",
         "order.OrderDetail": "fas fa-users",
