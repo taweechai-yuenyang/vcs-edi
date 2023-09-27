@@ -84,7 +84,7 @@ class Product(models.Model):
     id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
     skid = models.CharField(max_length=8, verbose_name="Formula ID", unique=True, blank=False, null=False)
     prod_type_id = models.ForeignKey(ProductType, blank=True, verbose_name="Product Type ID", on_delete=models.SET_NULL, null=True)
-    code = models.CharField(max_length=50, verbose_name="Code", unique=True, blank=False, null=False)
+    code = models.CharField(max_length=50, verbose_name="Code", blank=False, null=False)
     name = models.CharField(max_length=150, verbose_name="Name", blank=False, null=False)
     description = models.TextField(verbose_name="Description", blank=True, default="-")
     is_active = models.BooleanField(verbose_name="Is Active", default=True)

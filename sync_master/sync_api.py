@@ -4,15 +4,15 @@ import requests
 import json
 
 # Set your SQL Server connection parameter
-server = 'localhost'
-database = 'VCSDB'
-username = 'sa'
-password = 'ADSads123'
+server = '192.168.20.9'
+database = 'Formula'
+username = 'fm1234'
+password = 'x2y2'
 
 
 url = "http://localhost:8000/api/token/"
 
-payload = 'username=taweechai&password=admin@vcs'
+payload = 'username=taweechai&password=ADSads123'
 headers = {
     'Content-Type': 'application/x-www-form-urlencoded',
 }

@@ -108,11 +108,26 @@ DATABASES = {
         'PASSWORD': 'x2y2',
         'HOST': '192.168.20.9',
         'PORT': '1433',
-        "Trusted_Connection": "no",
-        "OPTIONS": {
-            "driver": "ODBC Driver 17 for SQL Server",
-        },
+        'OPTIONS': {
+            'driver': 'FreeTDS',
+            'unicode_results': True,
+            'host_is_server': True,
+            'driver_supports_utf8': True,
+            'extra_params': 'tds_version=7.4',
+        }
     },
+    # 'default': {
+    #     'ENGINE': 'mssql',
+    #     'NAME': 'EDI',
+    #     'USER': 'sa',
+    #     'PASSWORD': 'ADSads123',
+    #     'HOST': 'localhost',
+    #     'PORT': '1433',
+    #     "Trusted_Connection": "no",
+    #     "OPTIONS": {
+    #         "driver": "ODBC Driver 17 for SQL Server",
+    #     },
+    # },
 }
 
 # set this to False if you want to turn off pyodbc's connection pooling
@@ -173,7 +188,7 @@ REST_FRAMEWORK = {
 
 JWT_AUTH = {
     # how long the original token is valid for
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=2),
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),
     # allow refreshing of tokens
     'JWT_ALLOW_REFRESH': True,
     # this is the maximum time AFTER the token was issued that
