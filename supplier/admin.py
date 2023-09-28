@@ -30,7 +30,6 @@ class SupplierAdmin(admin.ModelAdmin):
     )
     
     search_fields = (
-        'skid',
         'code',
         'name',
     )
@@ -50,7 +49,6 @@ class SupplierAdmin(admin.ModelAdmin):
         ("", {
             "fields": (
                 ("user_id",),
-                ("skid",),
                 ("code",),
                 ("name",),
                 ("description",),

@@ -16,9 +16,10 @@ REVISE_LEVEL = [
 class UploadEDI(models.Model):
     id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
     edi_file = models.FileField(upload_to='static/edi/%Y-%m-%d/', verbose_name="FILE EDI", null=False, blank=False)
+    upload_date = models.DateField(verbose_name="Upload On")
     upload_seq = models.CharField(max_length=1, choices=REVISE_LEVEL, verbose_name="Upload Seq.", default="0")
     description = models.TextField(verbose_name="Description",blank=True, null=True)
-    upload_by_id = models.ForeignKey(ManagementUser, verbose_name="Upload By ID", blank=False, null=True, on_delete=models.SET_NULL)
+    upload_by_id = models.ForeignKey(ManagementUser, verbose_name="Upload By ID", blank=True, null=True, on_delete=models.SET_NULL)
     is_generated = models.BooleanField(verbose_name="Is Generated", default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -31,7 +32,7 @@ class UploadEDI(models.Model):
 class RequestOrder(models.Model):
     # REQUEST ORDER
     id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
-    created_by_id = models.ForeignKey(ManagementUser, verbose_name="Created By ID", blank=False, null=True, on_delete=models.SET_NULL)
+    created_by_id = models.ForeignKey(ManagementUser, verbose_name="Created By ID", blank=True, null=True, on_delete=models.SET_NULL)
     edi_file_id = models.ForeignKey(UploadEDI, verbose_name="EDI File ID", blank=False, null=False, on_delete=models.CASCADE)
     product_id = models.ForeignKey(Product, verbose_name="Product ID", blank=False, null=False, on_delete=models.CASCADE)
     book_id = models.ForeignKey(Book, verbose_name="Book ID", blank=False, null=True, on_delete=models.SET_NULL)
