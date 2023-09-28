@@ -44,6 +44,7 @@ def sync_supplier():
 
             print(f"{i}.Sync Status Code:{response.status_code} DataID: {FCSKID}")
             i += 1
+            # time.sleep(0.1)
             
         cursor.close()
         conn.close()
@@ -82,7 +83,7 @@ def sync_product_type():
 
             print(f"{i}.Sync Status Code:{response.status_code} DataID: {FCCODE}")
             i += 1
-            time.sleep(0.1)
+            # time.sleep(0.1)
             
         cursor.close()
         conn.close()
@@ -118,7 +119,7 @@ def sync_um():
 
             print(f"{i}.Sync Status Code:{response.status_code} DataID: {FCCODE}")
             i += 1
-            time.sleep(0.1)
+            # time.sleep(0.1)
             
         cursor.close()
         conn.close()
@@ -158,7 +159,7 @@ def sync_order_type():
 
             print(f"{i}.Sync Status Code:{response.status_code} DataID: {FCCODE}")
             i += 1
-            time.sleep(0.1)
+            # time.sleep(0.1)
             
         cursor.close()
         conn.close()
@@ -200,7 +201,7 @@ def sync_product():
 
             print(f"{i}.Sync Status Code:{response.status_code} DataID: {FCCODE}")
             i += 1
-            time.sleep(0.1)
+            # time.sleep(0.1)
             
         cursor.close()
         conn.close()
@@ -210,8 +211,8 @@ def sync_product():
 
 
 if __name__ == "__main__":
-    # sync_supplier()
-    # sync_product_type()
-    # sync_um()
-    # sync_order_type()
+    sync_supplier()
+    sync_product_type()
+    sync_um()
+    sync_order_type()
     sync_product()

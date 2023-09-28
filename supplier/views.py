@@ -35,6 +35,8 @@ class SupplierListApiView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+        print(serializer.error_messages)
+        print(serializer.is_valid())
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     # 3. Update
