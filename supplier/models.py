@@ -6,8 +6,8 @@ from django.contrib.auth.models import User
 class Supplier(models.Model):
     id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
     user_id = models.ManyToManyField(User, blank=True, verbose_name="User ID",null=True)
-    skid = models.CharField(max_length=8, verbose_name="Formula ID", unique=True)
-    code = models.CharField(max_length=150, verbose_name="Code",blank=False, null=False)
+    # skid = models.CharField(max_length=8, verbose_name="Formula ID", unique=True)
+    code = models.CharField(max_length=150, verbose_name="Code",unique=True,blank=False, null=False)
     name = models.CharField(max_length=250, verbose_name="Name", blank=False, null=False)
     description = models.TextField(verbose_name="Description")
     is_active = models.BooleanField(verbose_name="Is Active", default=True)
@@ -82,11 +82,12 @@ class Unit(models.Model):
 class Product(models.Model):
     # select p.FCSKID,p.FCTYPE,p.FCCODE,p.FCNAME,p.FCNAME2 from PROD p
     id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
-    skid = models.CharField(max_length=8, verbose_name="Formula ID", unique=True)
+    # skid = models.CharField(max_length=8, verbose_name="Formula ID", unique=True)
     prod_type_id = models.ForeignKey(ProductType, verbose_name="Product Type ID", on_delete=models.SET_NULL, null=True)
-    code = models.CharField(max_length=150, verbose_name="Code", null=False)
+    code = models.CharField(max_length=150, verbose_name="Code", unique=True, null=False)
     name = models.CharField(max_length=250, verbose_name="Name", null=False)
     description = models.TextField(verbose_name="Description")
+    img = models.ImageField(verbose_name="Image")
     is_active = models.BooleanField(verbose_name="Is Active", default=True)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)

@@ -29,7 +29,7 @@ def sync_supplier():
             FCSKID = str(f"{r[0]}").strip()
             FCCODE = str(f"{r[1]}").strip()
             FCNAME = str(f"{r[2]}").strip()
-            payload = f'skid={FCSKID}&code={FCCODE}&name={FCNAME}&description=-&is_active=1'.encode(
+            payload = f'code={FCCODE}&name={FCNAME}&description=-&is_active=1'.encode(
                 'utf8')
             headers = {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -174,19 +174,20 @@ def sync_product():
         obj = response.json()
         token = obj['access']
         conn = pymssql.connect(host=dbHost, user=dbUser,password=dbPassword, charset=dbCharset, database=dbName, tds_version=r'7.0')
-        SQL_QUERY = f"""select FCSKID,FCTYPE,FCCODE,FCNAME,FCNAME2 from PROD"""
+        SQL_QUERY = f"""select FCSKID,FCTYPE,FCCODE,FCNAME,FCNAME2 from PROD order by FCCODE,FCNAME"""
         cursor = conn.cursor()
         cursor.execute(SQL_QUERY)
         err = []
         i = 1
         for r in cursor.fetchall():
-            FCSKID = str(f"{r[0]}").strip()
             FCTYPE = str(f"{r[1]}").strip()
             FCCODE = str(f"{r[2]}").strip()
             FCNAME = str(f"{r[3]}").strip()
             FCNAME2 = str(f"{r[4]}").strip()
+            if len(FCNAME2) == 0:
+                FCNAME2 = f"{FCCODE}-{FCNAME}"
 
-            payload = f'skid={FCSKID}&prod_type_id={FCTYPE}&code={FCCODE}&name={FCNAME}&description={FCNAME2}&is_active=1'.encode(
+            payload = f'prod_type_id={FCTYPE}&code={FCCODE}&name={FCNAME}&description={FCNAME2}&is_active=1'.encode(
                 'utf8')
             headers = {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -197,11 +198,18 @@ def sync_product():
 
             # print(response.text)
             if response.status_code != 201:
+                if response.status_code == 401:
+                    response = requests.request("POST", f"{urlAPI}/api/token/", headers=objHeader, data=userLogIn)
+                    obj = response.json()
+                    token = obj['access']
+                
+                elif response.status_code == 400:
+                    print(response.text)
+                    
                 err.append(FCCODE)
-
-            print(f"{i}.Sync Status Code:{response.status_code} DataID: {FCCODE}")
+                
+            print(f"{i}.Sync PROD Status Code:{response.status_code} DataID: {FCCODE}")
             i += 1
-            # time.sleep(0.1)
             
         cursor.close()
         conn.close()
@@ -211,8 +219,8 @@ def sync_product():
 
 
 if __name__ == "__main__":
-    sync_supplier()
-    sync_product_type()
-    sync_um()
-    sync_order_type()
+    # sync_supplier()
+    # sync_product_type()
+    # sync_um()
+    # sync_order_type()
     sync_product()

@@ -15,7 +15,7 @@ ORDER_STEP = [
 
 class OrderHead(models.Model):
     id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
-    order_skid = models.CharField(max_length=8, verbose_name="Formula ID", unique=True, blank=False, null=False)
+    # order_skid = models.CharField(max_length=8, verbose_name="Formula ID", unique=True, blank=False, null=False)
     supplier_id = models.ForeignKey(Supplier, verbose_name="Supplier ID", on_delete=models.SET_NULL, null=True)
     order_type_id = models.ForeignKey(OrderType, verbose_name="Order Type ID", on_delete=models.SET_NULL, null=True)
     order_date = models.DateField(verbose_name="Order Date", blank=False, null=False)
@@ -42,7 +42,7 @@ class OrderHead(models.Model):
 class OrderDetail(models.Model):
     # select i.FCSKID,i.FCORDERH,i.FCPROD,i.FNUMQTY,i.FNQTY,i.FNPRICE,i.FNVATAMT,i.FCSEQ,i.FCUM  from ORDERI i
     id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
-    order_skid = models.CharField(max_length=8, verbose_name="Formula ID", unique=True, blank=False, null=False)
+    # order_skid = models.CharField(max_length=8, verbose_name="Formula ID", unique=True, blank=False, null=False)
     order_id = models.ForeignKey(OrderHead, verbose_name="Order ID", on_delete=models.CASCADE, null=True)
     product_id = models.ForeignKey(Product, verbose_name="Product ID", on_delete=models.CASCADE, null=True)
     unit_id = models.ForeignKey(Unit, verbose_name="Unit ID", on_delete=models.SET_NULL, null=True)

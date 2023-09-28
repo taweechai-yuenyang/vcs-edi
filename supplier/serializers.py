@@ -5,7 +5,7 @@ from .models import Supplier, OrderType, ProductType, Product, Unit
 class SupplierSerializer(serializers.ModelSerializer):
     class Meta:
         model = Supplier
-        fields = ('id','user_id','skid','code','name','description','is_active','created_on','updated_on',)
+        fields = ('id','user_id','code','name','description','is_active','created_on','updated_on',)
         
 class OrderTypeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -25,4 +25,4 @@ class UnitSerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ('id','skid','prod_type_id','code','name','description','is_active','created_on','updated_on',)
+        fields = ('id','prod_type_id','code','name','description','is_active','created_on','updated_on',)
