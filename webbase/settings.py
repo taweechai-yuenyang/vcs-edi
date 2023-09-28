@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "supplier.apps.SupplierConfig",
     "order.apps.OrderConfig",
+    'upload_edi.apps.UploadEdiConfig',
     'import_export',
     'tinymce',
     'django_json_widget',
@@ -101,33 +102,33 @@ WSGI_APPLICATION = "webbase.wsgi.application"
 # }
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'mssql',
-        'NAME': 'EDI',
-        'USER': 'fm1234',
-        'PASSWORD': 'x2y2',
-        'HOST': '192.168.20.9',
-        'PORT': '1433',
-        'OPTIONS': {
-            'driver': 'FreeTDS',
-            'unicode_results': True,
-            'host_is_server': True,
-            'driver_supports_utf8': True,
-            'extra_params': 'tds_version=7.4',
-        }
-    },
     # 'default': {
     #     'ENGINE': 'mssql',
     #     'NAME': 'EDI',
-    #     'USER': 'sa',
-    #     'PASSWORD': 'ADSads123',
-    #     'HOST': 'localhost',
+    #     'USER': 'fm1234',
+    #     'PASSWORD': 'x2y2',
+    #     'HOST': '192.168.20.9',
     #     'PORT': '1433',
-    #     "Trusted_Connection": "no",
-    #     "OPTIONS": {
-    #         "driver": "ODBC Driver 17 for SQL Server",
-    #     },
+    #     'OPTIONS': {
+    #         'driver': 'FreeTDS',
+    #         'unicode_results': True,
+    #         'host_is_server': True,
+    #         'driver_supports_utf8': True,
+    #         'extra_params': 'tds_version=7.4',
+    #     }
     # },
+    'default': {
+        'ENGINE': 'mssql',
+        'NAME': 'EDI',
+        'USER': 'sa',
+        'PASSWORD': 'ADSads123',
+        'HOST': 'localhost',
+        'PORT': '1433',
+        "Trusted_Connection": "no",
+        "OPTIONS": {
+            "driver": "ODBC Driver 17 for SQL Server",
+        },
+    },
 }
 
 # set this to False if you want to turn off pyodbc's connection pooling
@@ -204,6 +205,7 @@ APPEND_SLASH = False
 # AUTHENTICATION_BACKENDS = (
 #     'supplier.authentication.EmailBackend',
 # )
+AUTH_USER_MODEL = 'supplier.ManagementUser'
 
 JAZZMIN_SETTINGS = {
     # # title of the window (Will default to current_admin_site.site_title if absent or None)
@@ -309,12 +311,21 @@ JAZZMIN_SETTINGS = {
         "auth.user": "fas fa-user",
         "auth.Group": "fas fa-users",
         "supplier.Supplier": "fas fa-users",
-        "supplier.ProductType": "fas fa-users",
-        "supplier.Unit": "fas fa-users",
-        "supplier.OrderType": "fas fa-cogs",
-        "supplier.Product": "fas fa-users",
-        "order.OrderHead": "fas fa-users",
-        "order.OrderDetail": "fas fa-users",
+        "supplier.ProductType": "fas fa-table",
+        "supplier.Unit": "fas fa-tags",
+        "supplier.OrderType": "fas fa-layer-group",
+        "supplier.Product": "fas fa-database",
+        "supplier.ProductGroup": "fas fa-tags",
+        "supplier.Section": "fas fa-id-card-alt",
+        "supplier.Department": "fas fa-id-card",
+        "supplier.Book": "fas fa-book",
+        "supplier.ManagementUser": "fas fa-user-friends",
+        "upload_edi.UploadEDI": "fas fa-upload",
+        'upload_edi.RequestOrder': "fas fa-tasks",
+        'upload_edi.PurchaseRequest': "fas fa-list-ol",
+        'upload_edi.PurchaseOrder': "fas fa-file-invoice",
+        "order.OrderHead": "fas fa-cart-arrow-down",
+        "order.OrderDetail": "fas fa-table",
     },
     # Icons that are used when one is not manually specified
     "default_icon_parents": "fas fa-chevron-circle-right",

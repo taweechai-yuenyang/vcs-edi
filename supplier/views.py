@@ -1,7 +1,7 @@
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import Supplier, OrderType, Product, ProductType, Unit
+from .models import ProductGroup, Supplier, OrderType, Product, ProductType, Unit
 from .serializers import SupplierSerializer,OrderTypeSerializer,ProductTypeSerializer,UnitSerializer,ProductSerializer
 
 
@@ -200,10 +200,11 @@ class ProductListApiView(APIView):
         '''
         Create the Todo with given todo data
         '''
-        
+        pGrp = ProductGroup.objects.get(code=request.POST.get('prod_group_id'))
         pType = ProductType.objects.get(code=request.data.get('prod_type_id'))
         obj = request.POST.copy()
         obj['prod_type_id'] = pType.id
+        obj['prod_group_id'] = pGrp.id
         
         serializer = ProductSerializer(data=obj)
         if serializer.is_valid():

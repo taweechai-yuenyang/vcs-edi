@@ -1,7 +1,7 @@
 import uuid
 from django.db import models
 from django.contrib.auth.models import User
-from supplier.models import Supplier, OrderType, Product, Unit
+from supplier.models import ManagementUser, Supplier, OrderType, Product, Unit
 
 # Create your models here.
 # select o.FCSKID,o.FCCOOR,o.FCREFTYPE,o.FDDATE,o.FCCODE,o.FCREFNO,o.FNAMT,o.FCSTEP from ORDERH o where o.FCREFTYPE='PO' and o.FCSTEP='1' order by o.FDDATE 
@@ -70,7 +70,7 @@ class OrderDetail(models.Model):
 class OrderConfirm(models.Model):
     id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
     order_detail_id = models.ForeignKey(OrderDetail, verbose_name="Order Detail ID", on_delete=models.CASCADE, null=True)
-    user_id = models.ForeignKey(User, verbose_name="Order Detail ID", on_delete=models.CASCADE, null=True)
+    user_id = models.ForeignKey(ManagementUser, verbose_name="Confirm By ID", on_delete=models.CASCADE, null=True)
     invoice_no = models.CharField(max_length=150, verbose_name="Invoice No.", blank=False, null=True)
     qty = models.FloatField(max_length=18, verbose_name="Qty.", default="0.0", blank=False, null=False)
     confirm_qty = models.FloatField(max_length=18, verbose_name="Confirm Qty.", default="0.0", blank=False, null=False)

@@ -1,9 +1,11 @@
 from django import forms
-from django.forms import ModelForm
 from django.contrib import admin
-from django.contrib.admin import ModelAdmin
+from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group
-from .models import Supplier, OrderType, ProductType, Unit, Product
+from django.forms import ModelForm
+
+from .models import (Book, Department, ManagementUser, OrderType, Product,
+                     ProductGroup, ProductType, Section, Supplier, Unit)
 
 # # Register your models here.
 # class SupplierForm(ModelForm):
@@ -161,6 +163,7 @@ class UnitAdmin(admin.ModelAdmin):
 class ProductAdmin(admin.ModelAdmin):
     list_display = (
         'prod_type_id',
+        'prod_group_id',
         'code',
         'name',
         'description',
@@ -174,7 +177,7 @@ class ProductAdmin(admin.ModelAdmin):
         'name',
     )
     
-    list_filter = ('prod_type_id','is_active',)
+    list_filter = ('prod_type_id','prod_group_id','is_active',)
     
     # ordering = ("code","name",)
     list_per_page = 25
@@ -215,8 +218,150 @@ class OrderTypeAdmin(admin.ModelAdmin):
         return obj.updated_on.strftime("%d-%m-%Y %H:%M:%S")
     pass
 
+class SectionAdmin(admin.ModelAdmin):
+    list_display = (
+        'code',
+        'name',
+        'description',
+        'is_active',
+        'created_at',
+        'updated_at',
+    )
+    
+    search_fields = (
+        'code',
+        'name',
+    )
+    
+    list_filter = ('is_active',)
+    
+    # ordering = ("code","name",)
+    list_per_page = 25
+    
+    def created_at(self, obj):
+        return obj.created_on.strftime("%d-%m-%Y %H:%M:%S")
+    
+    def updated_at(self, obj):
+        return obj.updated_on.strftime("%d-%m-%Y %H:%M:%S")
+    pass
+
+class DepartmentAdmin(admin.ModelAdmin):
+    list_display = (
+        'code',
+        'name',
+        'description',
+        'is_active',
+        'created_at',
+        'updated_at',
+    )
+    
+    search_fields = (
+        'code',
+        'name',
+    )
+    
+    list_filter = ('is_active',)
+    
+    # ordering = ("code","name",)
+    list_per_page = 25
+    
+    def created_at(self, obj):
+        return obj.created_on.strftime("%d-%m-%Y %H:%M:%S")
+    
+    def updated_at(self, obj):
+        # return obj.updated_on.strftime("%d %b %Y %H:%M:%S")
+        return obj.updated_on.strftime("%d-%m-%Y %H:%M:%S")
+    pass
+
+class BookAdmin(admin.ModelAdmin):
+    list_display = (
+        'order_type_id',
+        'code',
+        'name',
+        'prefix',
+        'description',
+        'is_active',
+        'created_at',
+        'updated_at',
+    )
+    
+    search_fields = (
+        'code',
+        'name',
+    )
+    
+    list_filter = ('is_active',)
+    
+    # ordering = ("code","name",)
+    list_per_page = 25
+    
+    def created_at(self, obj):
+        return obj.created_on.strftime("%d-%m-%Y %H:%M:%S")
+    
+    def updated_at(self, obj):
+        # return obj.updated_on.strftime("%d %b %Y %H:%M:%S")
+        return obj.updated_on.strftime("%d-%m-%Y %H:%M:%S")
+    pass
+
+class ProductGroupAdmin(admin.ModelAdmin):
+    list_display = (
+        'code',
+        'name',
+        'description',
+        'is_active',
+        'created_at',
+        'updated_at',
+    )
+    
+    search_fields = (
+        'code',
+        'name',
+    )
+    
+    list_filter = ('is_active',)
+    
+    # ordering = ("code","name",)
+    list_per_page = 25
+    
+    def created_at(self, obj):
+        return obj.created_on.strftime("%d-%m-%Y %H:%M:%S")
+    
+    def updated_at(self, obj):
+        # return obj.updated_on.strftime("%d %b %Y %H:%M:%S")
+        return obj.updated_on.strftime("%d-%m-%Y %H:%M:%S")
+    pass
+
+class ManagementUserAdmin(UserAdmin):
+    list_display = ('username', 'email', 'first_name', 'last_name','department_id', 'section_id', 'is_staff')
+    fieldsets = (
+        (None, {
+            'fields': ('username', 'password')
+        }),
+        ('Personal info', {
+            'fields': ('first_name', 'last_name', 'email')
+        }),
+        ('Permissions', {
+            'fields': (
+                'is_active', 'is_staff', 'is_superuser',
+                'groups', 'user_permissions'
+                )
+        }),
+        ('Important dates', {
+            'fields': ('last_login', 'date_joined')
+        }),
+        ('Additional info', {
+            'fields': ('department_id', 'section_id','avatar_url','signature_img', 'description')
+        })
+    )
+    pass
+
 admin.site.register(Supplier, SupplierAdmin)
 admin.site.register(ProductType, ProductTypeAdmin)
 admin.site.register(Unit, UnitAdmin)
 admin.site.register(Product, ProductAdmin)
 admin.site.register(OrderType, OrderTypeAdmin)
+admin.site.register(Book, BookAdmin)
+admin.site.register(Section, SectionAdmin)
+admin.site.register(Department, DepartmentAdmin)
+admin.site.register(ProductGroup, ProductGroupAdmin)
+admin.site.register(ManagementUser, ManagementUserAdmin)
