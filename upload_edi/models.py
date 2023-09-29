@@ -1,7 +1,7 @@
 import uuid
 from django.db import models
 
-from supplier.models import Book, ManagementUser, Product, Supplier
+from supplier.models import Book, ManagementUser, Product, ProductGroup, Section, Supplier
 
 REVISE_LEVEL = [
     ('0', 'Revise 0'),
@@ -12,10 +12,29 @@ REVISE_LEVEL = [
     ('5', 'Revise 5'),
 ]
 
+EDI_REQUEST_STATUS = [
+    ('0', 'Draff'),
+    ('1', 'Wait for Approve'),
+    ('2', 'Purchase Request'),
+    ('3', 'Cancel'),
+    ('4', 'Reject'),
+]
+
+PURCHASE_STATUS = [
+    ('0', 'Draff'),
+    ('1', 'Wait for Approve'),
+    ('2', 'Purchase Order'),
+    ('3', 'Cancel'),
+    ('4', 'Reject'),
+]
+
 # Create your models here.
 class UploadEDI(models.Model):
     id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
-    supplier_id = models.ForeignKey(Supplier, verbose_name="Supplier ID", blank=True, null=True, on_delete=models.SET_NULL)
+    section_id = models.ForeignKey(Section, verbose_name="Section ID", blank=False, on_delete=models.SET_NULL)
+    book_id = models.ForeignKey(Book, verbose_name="Book ID", blank=False, on_delete=models.SET_NULL)
+    supplier_id = models.ForeignKey(Supplier, verbose_name="Supplier ID", blank=False, on_delete=models.SET_NULL)
+    product_group_id = models.ForeignKey(ProductGroup, verbose_name="Model ID", on_delete=models.SET_NULL)
     edi_file = models.FileField(upload_to='static/edi/%Y-%m-%d/', verbose_name="FILE EDI", null=False, blank=False)
     upload_date = models.DateField(verbose_name="Upload On")
     upload_seq = models.CharField(max_length=1, choices=REVISE_LEVEL, verbose_name="Revise Level", default="0")
@@ -33,13 +52,12 @@ class UploadEDI(models.Model):
 class RequestOrder(models.Model):
     # REQUEST ORDER
     id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
-    created_by_id = models.ForeignKey(ManagementUser, verbose_name="Created By ID", blank=True, null=True, on_delete=models.SET_NULL)
     edi_file_id = models.ForeignKey(UploadEDI, verbose_name="EDI File ID", blank=False, null=False, on_delete=models.CASCADE)
     product_id = models.ForeignKey(Product, verbose_name="Product ID", blank=False, null=False, on_delete=models.CASCADE)
-    book_id = models.ForeignKey(Book, verbose_name="Book ID", blank=False, null=True, on_delete=models.SET_NULL)
-    revise_level = models.CharField(max_length=1, choices=REVISE_LEVEL, verbose_name="Revise Level", default="0")
-    qty = models.FloatField(verbose_name="Qty.", default="0.0")
-    is_completed = models.BooleanField(verbose_name="Generate Purchase Request", default=False)
+    request_qty = models.FloatField(verbose_name="Request Qty.", default="0.0")
+    balance_qty = models.FloatField(verbose_name="Balance Qty.", default="0.0")
+    request_by_id = models.ForeignKey(ManagementUser, verbose_name="Request By ID", blank=True, null=True, on_delete=models.SET_NULL)
+    request_status = models.CharField(max_length=1, choices=EDI_REQUEST_STATUS,verbose_name="Request Status", default="0")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -48,40 +66,74 @@ class RequestOrder(models.Model):
         verbose_name = "ข้อมูล Request Order"
         verbose_name_plural = "Request Order"
         
-# class PurchaseRequest(models.Model):
-#     id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
-#     created_by_id = models.ForeignKey(ManagementUser, verbose_name="Created By ID")
-#     request_order_id = models.ForeignKey(RequestOrder, verbose_name="Request Order ID", blank=False, null=False, on_delete=models.CASCADE)
-#     book_id = models.ForeignKey(Book, verbose_name="Book ID", blank=False, null=True, on_delete=models.SET_NULL)
-#     purchase_no = models.CharField(verbose_name="Purchase No", max_length=50, null=False, blank=False)
-#     purchase_date = models.DateField(verbose_name="Purchase Date", blank=False, null=False)
-#     revise_level = models.CharField(max_length=1, choices=REVISE_LEVEL, verbose_name="Revise Level", default="0")
-#     item = models.IntegerField(verbose_name="Item", default="0")
-#     qty = models.FloatField(verbose_name="Qty.", default="0.0")
-#     is_created_po = models.BooleanField(verbose_name="Is Created To PO", default=False)
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
+class ApproveRequestOrder(models.Model):
+    id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
+    request_order_id = models.ForeignKey(RequestOrder, verbose_name="Request ID", blank=False, null=False, on_delete=models.CASCADE)
+    request_by_id = models.ForeignKey(ManagementUser, verbose_name="Request By ID", blank=True, null=True, on_delete=models.SET_NULL)
+    description = models.TextField(verbose_name="Description", blank=True, null=True)
+    request_status = models.CharField(max_length=1, choices=EDI_REQUEST_STATUS,verbose_name="Request Status", default="0")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
-#     class Meta:
-#         db_table = "tbtPurchaseRequest"
-#         verbose_name = "ข้อมูล Purchase Request"
-#         verbose_name_plural = "Purchase Request"
+    class Meta:
+        db_table = "tbtApproveRequestOrder"
+        verbose_name = "ข้อมูล Approve Request Order"
+        verbose_name_plural = "Approve Request Order"
         
-# class PurchaseRequestDetail(models.Model):
-#     # PURCHASE REQUEST DETAIL
-#     id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
-#     created_by_id = models.ForeignKey(ManagementUser, verbose_name="Created By ID")
-#     purchase_request_id = models.ForeignKey(PurchaseRequest, verbose_name="Purchase Request ID", blank=False, null=False, on_delete=models.CASCADE)
-#     product_id = models.ForeignKey(Product, verbose_name="Product ID", blank=False, null=False, on_delete=models.SET_NULL)
-#     qty = models.FloatField(verbose_name="Qty.", default="0.0")
-#     is_purchase = models.BooleanField(verbose_name="Is Purchase", default=False)
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
+# เปิด PR
+class PurchaseRequest(models.Model):
+    id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
+    edi_file_id = models.ForeignKey(UploadEDI, verbose_name="EDI File ID", blank=False, null=True, on_delete=models.SET_NULL)
+    section_id = models.ForeignKey(Section, verbose_name="Section ID", blank=False, on_delete=models.SET_NULL)
+    book_id = models.ForeignKey(Book, verbose_name="Book ID", blank=False, on_delete=models.SET_NULL)
+    supplier_id = models.ForeignKey(Supplier, verbose_name="Supplier ID", blank=False, on_delete=models.SET_NULL)
+    product_group_id = models.ForeignKey(ProductGroup, verbose_name="Model ID", on_delete=models.SET_NULL)
+    purchase_no = models.CharField(verbose_name="Purchase No", max_length=50, null=False, blank=False)
+    purchase_date = models.DateField(verbose_name="Purchase Date", blank=False, null=False)
+    revise_level = models.CharField(max_length=1, choices=REVISE_LEVEL, verbose_name="Revise Level", default="0")
+    item = models.IntegerField(verbose_name="Item", default="0")
+    qty = models.FloatField(verbose_name="Qty.", default="0.0")
+    created_by_id = models.ForeignKey(ManagementUser, verbose_name="Created By ID", null=True, blank=True, on_delete=models.SET_NULL)
+    purchase_status = models.CharField(verbose_name="Purchase Status", choices=PURCHASE_STATUS, default="0", null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
-#     class Meta:
-#         db_table = "tbtPurchaseOrderDetail"
-#         verbose_name = "ข้อมูล Purchase Request Detail"
-#         verbose_name_plural = "Purchase Request Detail"
+    class Meta:
+        db_table = "tbtPurchaseRequest"
+        verbose_name = "ข้อมูล Purchase Request"
+        verbose_name_plural = "Purchase Request"
+        
+class PurchaseRequestDetail(models.Model):
+    # PURCHASE REQUEST DETAIL
+    id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
+    purchase_request_id = models.ForeignKey(PurchaseRequest, verbose_name="Purchase Request ID", blank=False, null=False, on_delete=models.CASCADE)
+    request_order_id = models.ForeignKey(RequestOrder, verbose_name="Request Order ID", blank=True, null=True, on_delete=models.SET_NULL)
+    product_id = models.ForeignKey(Product, verbose_name="Product ID", blank=False, null=False, on_delete=models.SET_NULL)
+    seq = models.IntegerField(verbose_name="Sequence", blank=True, null=True,default="0")
+    qty = models.FloatField(verbose_name="Qty.", default="0.0")
+    is_confirm = models.BooleanField(verbose_name="Confirmed", default=False)
+    created_by_id = models.ForeignKey(ManagementUser, verbose_name="Created By ID", blank=True, null=True, on_delete=models.SET_NULL)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = "tbtPurchaseRequestDetail"
+        verbose_name = "ข้อมูล Purchase Request Detail"
+        verbose_name_plural = "Purchase Request Detail"
+        
+class ApprovePurchaseRequest(models.Model):
+    id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
+    request_order_id = models.ForeignKey(PurchaseRequest, verbose_name="Purchase Request ID", blank=False, null=False, on_delete=models.CASCADE)
+    request_by_id = models.ForeignKey(ManagementUser, verbose_name="Request By ID", blank=True, null=True, on_delete=models.SET_NULL)
+    description = models.TextField(verbose_name="Description", blank=True, null=True)
+    purchase_request_status = models.CharField(max_length=1, choices=PURCHASE_STATUS,verbose_name="Purchase Request Status", default="0")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = "tbtApprovePurchaseRequest"
+        verbose_name = "ข้อมูล Approve Purchase Request"
+        verbose_name_plural = "Approve Purchase Request"
         
 # # PurchaseOrder
 # class PurchaseOrder(models.Model):
