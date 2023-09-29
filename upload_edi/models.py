@@ -1,7 +1,7 @@
 import uuid
 from django.db import models
 
-from supplier.models import Book, ManagementUser, Product
+from supplier.models import Book, ManagementUser, Product, Supplier
 
 REVISE_LEVEL = [
     ('0', 'Revise 0'),
@@ -15,9 +15,10 @@ REVISE_LEVEL = [
 # Create your models here.
 class UploadEDI(models.Model):
     id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
+    supplier_id = models.ForeignKey(Supplier, verbose_name="Supplier ID", blank=True, null=True, on_delete=models.SET_NULL)
     edi_file = models.FileField(upload_to='static/edi/%Y-%m-%d/', verbose_name="FILE EDI", null=False, blank=False)
     upload_date = models.DateField(verbose_name="Upload On")
-    upload_seq = models.CharField(max_length=1, choices=REVISE_LEVEL, verbose_name="Upload Seq.", default="0")
+    upload_seq = models.CharField(max_length=1, choices=REVISE_LEVEL, verbose_name="Revise Level", default="0")
     description = models.TextField(verbose_name="Description",blank=True, null=True)
     upload_by_id = models.ForeignKey(ManagementUser, verbose_name="Upload By ID", blank=True, null=True, on_delete=models.SET_NULL)
     is_generated = models.BooleanField(verbose_name="Is Generated", default=False)
