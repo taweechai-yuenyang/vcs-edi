@@ -251,13 +251,9 @@ REST_FRAMEWORK = {
 }
 
 JWT_AUTH = {
-    # how long the original token is valid for
     'ACCESS_TOKEN_LIFETIME': datetime.timedelta(days=2),
     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),
-    # allow refreshing of tokens
     'JWT_ALLOW_REFRESH': True,
-    # this is the maximum time AFTER the token was issued that
-    # it can be refreshed.  expired tokens can't be refreshed.
     'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
 }
 
@@ -266,8 +262,9 @@ APPEND_SLASH = False
 
 # ### Login By Email Address
 # AUTHENTICATION_BACKENDS = (
-#     'supplier.authentication.EmailBackend',
+#     'webbase.authentication.EmailBackend',
 # )
+
 AUTH_USER_MODEL = 'supplier.ManagementUser'
 
 JAZZMIN_SETTINGS = {
