@@ -24,8 +24,19 @@ PURCHASE_STATUS = [
     ('0', 'Draff'),
     ('1', 'Wait for Approve'),
     ('2', 'Purchase Order'),
+    ('3', 'Approve'),
+    ('4', 'Cancel'),
+    ('5', 'Reject'),
+    ('6', 'Revise')
+]
+
+PURCHASE_ORDER_STATUS = [
+    ('0', 'Draff'),
+    ('1', 'Wait for Approve'),
+    ('2', 'Approve'),
     ('3', 'Cancel'),
     ('4', 'Reject'),
+    ('5', 'Revise')
 ]
 
 # Create your models here.
@@ -93,8 +104,10 @@ class PurchaseRequest(models.Model):
     revise_level = models.CharField(max_length=1, choices=REVISE_LEVEL, verbose_name="Revise Level", default="0")
     item = models.IntegerField(verbose_name="Item", default="0")
     qty = models.FloatField(verbose_name="Qty.", default="0.0")
+    description = models.TextField(verbose_name="Description", default="-", blank=True, null=True)
     created_by_id = models.ForeignKey(ManagementUser, verbose_name="Created By ID", null=True, blank=True, on_delete=models.SET_NULL)
     purchase_status = models.CharField(verbose_name="Purchase Status", choices=PURCHASE_STATUS, default="0", null=True, blank=True)
+    is_sync = models.BooleanField(verbose_name="Status Sync", default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -112,6 +125,7 @@ class PurchaseRequestDetail(models.Model):
     seq = models.IntegerField(verbose_name="Sequence", blank=True, null=True,default="0")
     qty = models.FloatField(verbose_name="Qty.", default="0.0")
     is_confirm = models.BooleanField(verbose_name="Confirmed", default=False)
+    is_sync = models.BooleanField(verbose_name="Status Sync", default=False)
     created_by_id = models.ForeignKey(ManagementUser, verbose_name="Created By ID", blank=True, null=True, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -124,7 +138,7 @@ class PurchaseRequestDetail(models.Model):
 class ApprovePurchaseRequest(models.Model):
     id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
     request_order_id = models.ForeignKey(PurchaseRequest, verbose_name="Purchase Request ID", blank=False, null=False, on_delete=models.CASCADE)
-    request_by_id = models.ForeignKey(ManagementUser, verbose_name="Request By ID", blank=True, null=True, on_delete=models.SET_NULL)
+    approve_by_id = models.ForeignKey(ManagementUser, verbose_name="Approve By ID", blank=True, null=True, on_delete=models.SET_NULL)
     description = models.TextField(verbose_name="Description", blank=True, null=True)
     purchase_request_status = models.CharField(max_length=1, choices=PURCHASE_STATUS,verbose_name="Purchase Request Status", default="0")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -136,38 +150,53 @@ class ApprovePurchaseRequest(models.Model):
         verbose_name_plural = "Approve Purchase Request"
         
 # # PurchaseOrder
-# class PurchaseOrder(models.Model):
-#     # PURCHASE ORDER
-#     id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
-#     created_by_id = models.ForeignKey(ManagementUser, verbose_name="Created By ID")
-#     purchase_id = models.ForeignKey(PurchaseRequest, verbose_name="Purchase ID", blank=False, null=False, on_delete=models.CASCADE)
-#     book_id = models.ForeignKey(Book, verbose_name="Book ID", blank=False, null=True, on_delete=models.SET_NULL)
-#     order_no = models.CharField(verbose_name="Order No", max_length=50, null=False, blank=False)
-#     order_date = models.DateField(verbose_name="Order Date", blank=False, null=False)
-#     item = models.IntegerField(verbose_name="Item", default="0")
-#     qty = models.FloatField(verbose_name="Qty.", default="0.0")
-#     is_sync = models.BooleanField(verbose_name="Is Sync", default=False)
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
+class PurchaseOrder(models.Model):
+    # PURCHASE ORDER
+    id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
+    purchase_id = models.ForeignKey(PurchaseRequest, verbose_name="Purchase ID", blank=False, null=False, on_delete=models.CASCADE)
+    order_no = models.CharField(verbose_name="Order No", max_length=50, null=False, blank=False)
+    order_date = models.DateField(verbose_name="Order Date", blank=False, null=False)
+    item = models.IntegerField(verbose_name="Item", default="0")
+    qty = models.FloatField(verbose_name="Qty.", default="0.0")
+    order_status = models.CharField(max_length=1, verbose_name="Order Status", default="0")
+    description = models.TextField(verbose_name="Description", default="-", blank=True, null=True)
+    is_sync = models.BooleanField(verbose_name="Is Sync", default=False)
+    created_by_id = models.ForeignKey(ManagementUser, verbose_name="Created By ID", blank=True, null=True, on_delete=models.SET_NULL)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
-#     class Meta:
-#         db_table = "tbtPurchaseOrder"
-#         verbose_name = "ข้อมูล Purchase Order"
-#         verbose_name_plural = "Purchase Order"
+    class Meta:
+        db_table = "tbtPurchaseOrder"
+        verbose_name = "ข้อมูล Purchase Order"
+        verbose_name_plural = "Purchase Order"
         
-# class PurchaseOrderDetail(models.Model):
-#     # PURCHASE ORDER DETAIL
-#     id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
-#     created_by_id = models.ForeignKey(ManagementUser, verbose_name="Created By ID")
-#     purchase_order_id = models.ForeignKey(PurchaseOrder, verbose_name="Purchase Order ID", blank=False, null=False, on_delete=models.CASCADE)
-#     product_id = models.ForeignKey(Product, verbose_name="Product ID", blank=False, null=False, on_delete=models.SET_NULL)
-#     qty = models.FloatField(verbose_name="Qty.", default="0.0")
-#     is_active = models.BooleanField(verbose_name="Is Active", default=False)
-#     is_sync = models.BooleanField(verbose_name="Is Sync", default=False)
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
+class PurchaseOrderDetail(models.Model):
+    # PURCHASE ORDER DETAIL
+    id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
+    purchase_order_id = models.ForeignKey(PurchaseOrder, verbose_name="Purchase Order ID", blank=False, null=False, on_delete=models.CASCADE)
+    product_id = models.ForeignKey(Product, verbose_name="Product ID", blank=False, null=False, on_delete=models.SET_NULL)
+    qty = models.FloatField(verbose_name="Qty.", default="0.0")
+    is_active = models.BooleanField(verbose_name="Is Active", default=False)
+    is_sync = models.BooleanField(verbose_name="Is Sync", default=False)
+    created_by_id = models.ForeignKey(ManagementUser, verbose_name="Created By ID", blank=True, null=True, on_delete=models.SET_NULL)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
-#     class Meta:
-#         db_table = "tbtPurchaseOrderDetail"
-#         verbose_name = "ข้อมูล Purchase Order Detail"
-#         verbose_name_plural = "Purchase Order Detail"
+    class Meta:
+        db_table = "tbtPurchaseOrderDetail"
+        verbose_name = "ข้อมูล Purchase Order Detail"
+        verbose_name_plural = "Purchase Order Detail"
+        
+class ApprovePurchaseOrder(models.Model):
+    id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
+    purchase_order_id = models.ForeignKey(PurchaseOrder, verbose_name="Purchase Request ID", blank=False, null=False, on_delete=models.CASCADE)
+    approve_by_id = models.ForeignKey(ManagementUser, verbose_name="Approve By ID", blank=True, null=True, on_delete=models.SET_NULL)
+    description = models.TextField(verbose_name="Description", blank=True, null=True)
+    purchase_request_status = models.CharField(max_length=1, choices=PURCHASE_ORDER_STATUS, verbose_name="Purchase Order Status", default="0")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = "tbtApprovePurchaseOrder"
+        verbose_name = "ข้อมูล Approve Purchase Order"
+        verbose_name_plural = "Approve Purchase Order"
