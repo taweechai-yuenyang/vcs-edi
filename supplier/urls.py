@@ -9,4 +9,9 @@ urlpatterns = [
     path('product_type', views.ProductTypeListApiView.as_view()),
     path('unit', views.UnitListApiView.as_view()),
     path('product', views.ProductListApiView.as_view()),
+    path("product_group", views.ProductGroupListApiView.as_view()),
+    path("section", views.SectionListApiView.as_view()),
+    path("position", views.PositionListApiView.as_view()),
+    path("department", views.DepartmentListApiView.as_view()),
+    path("book", views.BookListApiView.as_view()),
 ]

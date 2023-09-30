@@ -5,7 +5,7 @@ from django.contrib.auth.models import Group
 from django.forms import ModelForm
 
 from .models import (Book, Department, ManagementUser, OrderType, Product,
-                     ProductGroup, ProductType, Section, Supplier, Unit)
+                     ProductGroup, ProductType, Section, Position, Supplier, Unit)
 
 # # Register your models here.
 # class SupplierForm(ModelForm):
@@ -271,6 +271,34 @@ class DepartmentAdmin(admin.ModelAdmin):
         return obj.updated_on.strftime("%d-%m-%Y %H:%M:%S")
     pass
 
+class PositionAdmin(admin.ModelAdmin):
+    list_display = (
+        'code',
+        'name',
+        'description',
+        'is_active',
+        'created_at',
+        'updated_at',
+    )
+    
+    search_fields = (
+        'code',
+        'name',
+    )
+    
+    list_filter = ('is_active',)
+    
+    # ordering = ("code","name",)
+    list_per_page = 25
+    
+    def created_at(self, obj):
+        return obj.created_on.strftime("%d-%m-%Y %H:%M:%S")
+    
+    def updated_at(self, obj):
+        # return obj.updated_on.strftime("%d %b %Y %H:%M:%S")
+        return obj.updated_on.strftime("%d-%m-%Y %H:%M:%S")
+    pass
+
 class BookAdmin(admin.ModelAdmin):
     list_display = (
         'order_type_id',
@@ -330,7 +358,7 @@ class ProductGroupAdmin(admin.ModelAdmin):
     pass
 
 class ManagementUserAdmin(UserAdmin):
-    list_display = ('username', 'email', 'first_name', 'last_name','department_id', 'section_id', 'is_staff')
+    list_display = ('username', 'email', 'first_name', 'last_name','position_id','department_id', 'section_id', 'is_staff')
     fieldsets = (
         (None, {
             'fields': ('username', 'password')
@@ -348,7 +376,7 @@ class ManagementUserAdmin(UserAdmin):
             'fields': ('last_login', 'date_joined')
         }),
         ('Additional info', {
-            'fields': ('department_id', 'section_id','avatar_url','signature_img', 'description')
+            'fields': ('position_id','department_id', 'section_id','is_approve','avatar_url','signature_img', 'description')
         })
     )
     pass
@@ -359,6 +387,7 @@ admin.site.register(Unit, UnitAdmin)
 admin.site.register(Product, ProductAdmin)
 admin.site.register(OrderType, OrderTypeAdmin)
 admin.site.register(Book, BookAdmin)
+admin.site.register(Position, PositionAdmin)
 admin.site.register(Section, SectionAdmin)
 admin.site.register(Department, DepartmentAdmin)
 admin.site.register(ProductGroup, ProductGroupAdmin)

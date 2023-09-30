@@ -237,7 +237,7 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-DATABASE_ROUTERS = ["webbase.db.DBRouter"]
+DATABASE_ROUTERS = ["webbase.db_routes.DBRouter"]
 
 
 REST_FRAMEWORK = {
@@ -379,6 +379,7 @@ JAZZMIN_SETTINGS = {
         "supplier.OrderType": "fas fa-layer-group",
         "supplier.Product": "fas fa-database",
         "supplier.ProductGroup": "fas fa-tags",
+        "supplier.Position": "fas fa-key",
         "supplier.Section": "fas fa-id-card-alt",
         "supplier.Department": "fas fa-id-card",
         "supplier.Book": "fas fa-book",

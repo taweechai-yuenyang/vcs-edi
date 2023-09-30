@@ -92,6 +92,24 @@ class Section(models.Model):
         db_table = "tbmSection"
         verbose_name = "ข้อมูล Section"
         verbose_name_plural = "Section"
+        
+class Position(models.Model):
+    # select FCSKID,FCCODE,FCNAME,FCNAME2 from SECT
+    id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
+    code = models.CharField(max_length=50, verbose_name="Code", unique=True,blank=False, null=False)
+    name = models.CharField(max_length=250, verbose_name="Name", blank=False, null=False)
+    description = models.TextField(verbose_name="Description",blank=True, null=True)
+    is_active = models.BooleanField(verbose_name="Is Active", default=True)
+    created_on = models.DateTimeField(auto_now_add=True)
+    updated_on = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        db_table = "tbmPosition"
+        verbose_name = "ข้อมูล Position"
+        verbose_name_plural = "Position"
 
 class Department(models.Model):
     # select FCSKID,FCCODE,FCNAME,FCNAME2 from DEPT
@@ -119,14 +137,14 @@ class Book(models.Model):
     order_type_id = models.ForeignKey(OrderType, verbose_name="Type ID", on_delete=models.SET_NULL, null=True)
     code = models.CharField(max_length=50, verbose_name="Code", blank=False, null=False)
     name = models.CharField(max_length=250, verbose_name="Name", blank=False, null=False)
-    prefix = models.CharField(max_length=250, verbose_name="Prefix", blank=False, null=False)
+    prefix = models.CharField(max_length=250, verbose_name="Prefix", blank=True, null=True)
     description = models.TextField(verbose_name="Description",blank=True, null=True)
     is_active = models.BooleanField(verbose_name="Is Active", default=True)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return self.name
+        return f"{self.code}-{self.name}"
     
     class Meta:
         db_table = "tbmBook"
@@ -155,11 +173,14 @@ class Product(models.Model):
         verbose_name_plural = "Product"
         
 class ManagementUser(AbstractUser):
+    formula_user_id = models.CharField(max_length=8, verbose_name="Formula User ID", blank=True, null=True)
     department_id = models.ForeignKey(Department, blank=True, verbose_name="Department ID",null=True, on_delete=models.SET_NULL)
+    position_id = models.ForeignKey(Position, blank=True, verbose_name="Position ID",null=True, on_delete=models.SET_NULL)
     section_id = models.ForeignKey(Section, blank=True, verbose_name="Section ID",null=True, on_delete=models.SET_NULL)
     description = models.TextField(verbose_name="Description",blank=True, null=True)
     avatar_url = models.ImageField(verbose_name="Avatar Image")
     signature_img = models.ImageField(verbose_name="Signature Image")
+    is_approve = models.BooleanField(verbose_name="Is Approve", default=False)
     is_active = models.BooleanField(verbose_name="Is Active", default=True)
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
