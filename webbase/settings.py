@@ -383,8 +383,8 @@ JAZZMIN_SETTINGS = {
         "supplier.ManagementUser": "fas fa-user-friends",
         "upload_edi.UploadEDI": "fas fa-upload",
         'upload_edi.RequestOrder': "fas fa-tasks",
-        # 'upload_edi.PurchaseRequest': "fas fa-list-ol",
-        # 'upload_edi.PurchaseOrder': "fas fa-file-invoice",
+        'upload_edi.PurchaseRequest': "fas fa-money-check",
+        'upload_edi.PurchaseOrder': "fas fa-file-invoice",
     },
     # Icons that are used when one is not manually specified
     "default_icon_parents": "fas fa-chevron-circle-right",

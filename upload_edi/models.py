@@ -49,11 +49,11 @@ class UploadEDI(models.Model):
     product_group_id = models.ForeignKey(ProductGroup, verbose_name="Model ID", on_delete=models.CASCADE)
     edi_file = models.FileField(upload_to='upload_edi/static/edi/%Y-%m-%d/', verbose_name="FILE EDI", null=False, blank=False)
     edi_filename = models.CharField(max_length=150,verbose_name="FILE EDI",blank=True, null=True)
-    document_no = models.CharField(max_length=150,verbose_name="Document No.",blank=True, null=True)
+    document_no = models.CharField(max_length=150,verbose_name="Document No.",blank=True, null=True, editable=False)
     upload_date = models.DateField(verbose_name="Upload On",default=django.utils.timezone.now)
     upload_seq = models.CharField(max_length=1, choices=REVISE_LEVEL, verbose_name="Revise Level", default="0")
     description = models.TextField(verbose_name="Description",blank=True, null=True)
-    upload_by_id = models.ForeignKey(ManagementUser, verbose_name="Upload By ID", blank=True, null=True, on_delete=models.SET_NULL)
+    upload_by_id = models.ForeignKey(ManagementUser, verbose_name="Upload By ID", blank=True, null=True, on_delete=models.SET_NULL, editable=False)
     is_generated = models.BooleanField(verbose_name="Is Generated", default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -69,8 +69,13 @@ class UploadEDI(models.Model):
 class RequestOrder(models.Model):
     # REQUEST ORDER
     id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
-    edi_file_id = models.ForeignKey(UploadEDI, verbose_name="EDI File ID", blank=False, null=False, on_delete=models.CASCADE)
+    edi_file_id = models.ForeignKey(UploadEDI, verbose_name="EDI File ID", blank=False, null=False, on_delete=models.CASCADE, editable=False)
+    supplier_id = models.ForeignKey(Supplier, verbose_name="Supplier ID", on_delete=models.SET_NULL, null=True, blank=True)
+    section_id = models.ForeignKey(Section, verbose_name="Section ID", blank=True,null=True, on_delete=models.SET_NULL)
+    book_id = models.ForeignKey(Book, verbose_name="Book ID", blank=True,null=True, on_delete=models.SET_NULL)
+    product_group_id = models.ForeignKey(ProductGroup, verbose_name="Model ID", on_delete=models.SET_NULL, null=True, blank=True)
     product_id = models.ForeignKey(Product, verbose_name="Product ID", blank=False, null=False, on_delete=models.CASCADE)
+    request_date = models.DateField(verbose_name="Request Date",  null=True, blank=True)
     request_qty = models.FloatField(verbose_name="Request Qty.", default="0.0")
     balance_qty = models.FloatField(verbose_name="Balance Qty.", default="0.0")
     request_by_id = models.ForeignKey(ManagementUser, verbose_name="Request By ID", blank=True, null=True, on_delete=models.SET_NULL)
@@ -117,6 +122,9 @@ class PurchaseRequest(models.Model):
     is_sync = models.BooleanField(verbose_name="Status Sync", default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self) -> str:
+        return self.purchase_no
     
     class Meta:
         db_table = "tbtPurchaseRequest"
