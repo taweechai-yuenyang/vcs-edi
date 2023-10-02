@@ -228,7 +228,7 @@ class RequestOrderAdmin(admin.ModelAdmin):
 
 class ProductPurchaseRequestInline(admin.TabularInline):
     model = PurchaseRequestDetail
-    readonly_fields = ('seq','product_id',)
+    readonly_fields = ('seq','product_id','qty')
     fields = [
         'seq',
         'product_id',
