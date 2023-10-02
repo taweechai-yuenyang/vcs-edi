@@ -58,6 +58,9 @@ class UploadEDI(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
+    def __str__(self) -> str:
+        return self.document_no
+    
     class Meta:
         db_table = "tbtUploadFileEDI"
         verbose_name = "ข้อมูล UploadFileEDI"
@@ -74,6 +77,7 @@ class RequestOrder(models.Model):
     request_status = models.CharField(max_length=1, choices=EDI_REQUEST_STATUS,verbose_name="Request Status", default="0")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
     
     class Meta:
         db_table = "tbtRequestOrder"
