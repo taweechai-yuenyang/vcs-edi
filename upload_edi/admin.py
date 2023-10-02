@@ -114,7 +114,7 @@ def make_purchase_request(modeladmin, request, queryset):
     if int(obj[0].request_status) < 2:
         # print(obj[0].edi_file_id)
         dte = f'PR{obj[0].request_date.strftime("%Y%m%d")[3:]}'
-        rnd = PurchaseRequest.objects.filter(purchase_no__gt=dte).count() + 1
+        rnd = PurchaseRequest.objects.filter(purchase_no__gte=dte).count() + 1
         ids = f"{dte}{rnd:05d}"
         qty = 0
         for r in obj:

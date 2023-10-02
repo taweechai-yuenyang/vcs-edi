@@ -149,6 +149,7 @@ class PurchaseRequestDetail(models.Model):
         db_table = "tbtPurchaseRequestDetail"
         verbose_name = "ข้อมูล Purchase Request Detail"
         verbose_name_plural = "Purchase Request Detail"
+        ordering = ['purchase_request_id','seq']
         
 class ApprovePurchaseRequest(models.Model):
     id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
