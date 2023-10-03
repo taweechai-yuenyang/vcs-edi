@@ -185,11 +185,14 @@ class ManagementUser(AbstractUser):
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
     
+    def __str__(self):
+        return super().__str__()
+    
     class Meta:
         # db_table_comment = "formula_vcst"
         # app_label = "budgetaaa"
         # ordering = ('-updated_on','code','name')
-        db_table = "tbmUser"
+        db_table = "ediUser"
         verbose_name = "ข้อมูล User"
         verbose_name_plural = "User"
     

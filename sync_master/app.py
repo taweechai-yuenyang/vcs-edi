@@ -7,9 +7,14 @@ urlAPI = "http://localhost:8000"
 objHeader = {'Content-Type': 'application/x-www-form-urlencoded',}
 userLogIn = 'username=taweechai&password=ADSads123'
 
-dbHost = '192.168.20.9:1433'
-dbUser = 'fm1234'
-dbPassword = 'x2y2'
+# dbHost = '192.168.20.9:1433'
+# dbUser = 'fm1234'
+# dbPassword = 'x2y2'
+# dbName = 'Formula'
+# dbCharset = 'TIS-620'
+dbHost = 'localhost:1433'
+dbUser = 'sa'
+dbPassword = 'ADSads123'
 dbName = 'Formula'
 dbCharset = 'TIS-620'
 

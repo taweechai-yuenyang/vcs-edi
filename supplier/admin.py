@@ -1,3 +1,4 @@
+from typing import Any
 from django import forms
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
@@ -30,8 +31,8 @@ class SupplierAdmin(admin.ModelAdmin):
     )
     
     search_fields = (
-        'code',
         'name',
+        'code',
     )
     
     list_filter = (
@@ -161,12 +162,10 @@ class UnitAdmin(admin.ModelAdmin):
 class ProductAdmin(admin.ModelAdmin):
     list_display = (
         'prod_type_id',
-        'prod_group_id',
         'code',
         'name',
         'description',
         'is_active',
-        'created_at',
         'updated_at',
     )
     
@@ -379,6 +378,18 @@ class ManagementUserAdmin(UserAdmin):
             'fields': ('formula_user_id','position_id','department_id', 'section_id','is_approve','avatar_url','signature_img', 'description')
         })
     )
+    
+    def save_model(self, request, obj, form, change) -> None:
+        if obj.department_id is None:
+            dp = Department.objects.get(code="-")
+            obj.department_id = dp
+            
+        if obj.section_id  is None:
+            sp = Section.objects.get(code="-")
+            obj.section_id = sp
+            
+        return super().save_model(request, obj, form, change)
+    
     pass
 
 admin.site.register(Supplier, SupplierAdmin)
