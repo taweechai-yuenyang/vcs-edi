@@ -24,6 +24,9 @@ from rest_framework_simplejwt import views as jv
 admin.site.site_title = "EDI Web Application"
 admin.site.site_header = "EDI Web Application"
 admin.site.index_title = "EDI Management System"
+admin.site.site_url = "/"
+admin.site.enable_nav_sidebar = True
+admin.site.empty_value_display = "-"
 
 
 urlpatterns = [

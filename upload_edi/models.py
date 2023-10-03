@@ -77,6 +77,7 @@ class RequestOrder(models.Model):
     ro_qty = models.FloatField(verbose_name="Qty.", blank=True,null=True, default="0")
     ro_by_id = models.ForeignKey(ManagementUser, verbose_name="Request By ID", blank=True, null=True, on_delete=models.SET_NULL)
     ro_status = models.CharField(max_length=1, choices=EDI_REQUEST_STATUS,verbose_name="Request Status", default="0")
+    ref_formula_id = models.CharField(max_length=8, verbose_name="Ref. Formula ID", blank=True, null=True)
     is_sync = models.BooleanField(verbose_name="Is Sync", default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -98,6 +99,7 @@ class RequestOrderDetail(models.Model):
     request_status = models.CharField(max_length=1, choices=EDI_REQUEST_STATUS,verbose_name="Request Status", default="0")
     is_selected = models.BooleanField(verbose_name="Is Selected", default=True)
     is_sync = models.BooleanField(verbose_name="Is Sync", default=False)
+    ref_formula_id = models.CharField(max_length=8, verbose_name="Ref. Formula ID", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -132,7 +134,7 @@ class ApproveRequestOrder(models.Model):
 # เปิด PR
 class PurchaseRequest(models.Model):
     id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
-    edi_file_id = models.ForeignKey(UploadEDI, verbose_name="EDI File ID", blank=False, null=True, on_delete=models.SET_NULL)
+    request_order_id = models.ForeignKey(RequestOrder, verbose_name="Request Order ID", blank=False, null=True, on_delete=models.SET_NULL)
     section_id = models.ForeignKey(Section, verbose_name="Section ID", on_delete=models.CASCADE)
     book_id = models.ForeignKey(Book, verbose_name="Book ID", on_delete=models.CASCADE)
     supplier_id = models.ForeignKey(Supplier, verbose_name="Supplier ID", on_delete=models.CASCADE)
@@ -143,8 +145,8 @@ class PurchaseRequest(models.Model):
     qty = models.FloatField(verbose_name="Qty.", default="0.0")
     description = models.TextField(verbose_name="Description", default="-", blank=True, null=True)
     created_by_id = models.ForeignKey(ManagementUser, verbose_name="Created By ID", null=True, blank=True, on_delete=models.SET_NULL)
-    ref_no = models.CharField(verbose_name="Ref No", max_length=8, blank=True, null=True)
     purchase_status = models.CharField(max_length=1,verbose_name="Purchase Status", choices=PURCHASE_STATUS, default="0", null=True, blank=True)
+    ref_formula_id = models.CharField(max_length=8, verbose_name="Ref. Formula ID", blank=True, null=True)
     is_sync = models.BooleanField(verbose_name="Status Sync", default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -168,6 +170,7 @@ class PurchaseRequestDetail(models.Model):
     qty = models.FloatField(verbose_name="Qty.", default="0.0")
     is_confirm = models.BooleanField(verbose_name="Confirmed", default=False)
     is_sync = models.BooleanField(verbose_name="Status Sync", default=False)
+    ref_formula_id = models.CharField(max_length=8, verbose_name="Ref. Formula ID", blank=True, null=True)
     created_by_id = models.ForeignKey(ManagementUser, verbose_name="Created By ID", blank=True, null=True, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -203,9 +206,9 @@ class PurchaseOrder(models.Model):
     qty = models.FloatField(verbose_name="Qty.", default="0.0")
     order_status = models.CharField(max_length=1, verbose_name="Order Status", default="0")
     description = models.TextField(verbose_name="Description", default="-", blank=True, null=True)
-    ref_no = models.CharField(verbose_name="Ref No", max_length=8, blank=True, null=True)
     is_sync = models.BooleanField(verbose_name="Is Sync", default=False)
     created_by_id = models.ForeignKey(ManagementUser, verbose_name="Created By ID", blank=True, null=True, on_delete=models.SET_NULL)
+    ref_formula_id = models.CharField(max_length=8, verbose_name="Ref. Formula ID", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -224,6 +227,7 @@ class PurchaseOrderDetail(models.Model):
     is_active = models.BooleanField(verbose_name="Is Active", default=False)
     is_sync = models.BooleanField(verbose_name="Is Sync", default=False)
     created_by_id = models.ForeignKey(ManagementUser, verbose_name="Created By ID", blank=True, null=True, on_delete=models.SET_NULL)
+    ref_formula_id = models.CharField(max_length=8, verbose_name="Ref. Formula ID", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

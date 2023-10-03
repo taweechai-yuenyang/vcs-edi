@@ -75,13 +75,14 @@ class UploadEDIAdmin(admin.ModelAdmin):
                     ### Filter Request Order Header
                     ordID = None
                     try:
-                        ordID = RequestOrder.objects.get(supplier_id=obj.supplier_id,product_group_id=r["group_id"],book_id=obj.book_id,ro_date=obj.upload_date)
+                        ordID = RequestOrder.objects.get(supplier_id=obj.supplier_id,section_id=request.user.section_id,product_group_id=r["group_id"],book_id=obj.book_id,ro_date=obj.upload_date)
                     except Exception as e:
                         rndNo = f"RO{str(obj.upload_date.strftime('%Y%m%d'))[3:]}"
                         rnd = f"{rndNo}{(RequestOrder.objects.filter(ro_no__gte=rndNo).count() + 1):05d}"
                         ordID = RequestOrder(
                             edi_file_id=obj,
                             supplier_id=obj.supplier_id,
+                            section_id=request.user.section_id,
                             product_group_id=r["group_id"],
                             book_id=obj.book_id,
                             ro_no=rnd,
@@ -138,61 +139,72 @@ class UploadEDIAdmin(admin.ModelAdmin):
 
 @admin.action(description="Mark selected as Purchase Request")
 def make_purchase_request(modeladmin, request, queryset):
-    obj = queryset
-    if int(obj[0].request_status) < 2:
-        # print(obj[0].edi_file_id)
-        dte = f'PR{obj[0].request_date.strftime("%Y%m%d")[3:]}'
-        rnd = PurchaseRequest.objects.filter(purchase_no__gte=dte).count() + 1
-        ids = f"{dte}{rnd:05d}"
-        qty = 0
-        for r in obj:
-            qty += r.request_qty
-        
-        data = PurchaseRequest(
-            edi_file_id=obj[0].edi_file_id,
-            section_id=obj[0].section_id,
-            book_id=obj[0].book_id,
-            supplier_id=obj[0].supplier_id,
-            product_group_id=obj[0].product_group_id,
-            purchase_no=ids,
-            purchase_date=obj[0].request_date,
-            revise_level=obj[0].edi_file_id.upload_seq,
-            item=len(obj),
-            qty=qty,
-            created_by_id=request.user,
-            purchase_status="0",
-        )
-        data.save()
-        seq = 1
-        for r in obj:
-            pDetail = PurchaseRequestDetail(purchase_request_id=data,request_order_id=r,product_id=r.product_id,seq=seq,qty=r.request_qty,created_by_id=request.user)
-            pDetail.save()
-            seq += 1
-            
-        ### Update status
-        queryset.update(request_status="2")
+    data = queryset
+    for obj in data:
+        if int(obj.ro_status) < 2:
+            # print(obj[0].edi_file_id)
+            dte = f'PR{obj.ro_date.strftime("%Y%m%d")[3:]}'
+            rnd = PurchaseRequest.objects.filter(purchase_no__gte=dte).count() + 1
+            ids = f"{dte}{rnd:05d}"
+            data = PurchaseRequest(
+                edi_file_id=obj.edi_file_id,
+                section_id=request.user.section_id,
+                book_id=obj.book_id,
+                supplier_id=obj.supplier_id,
+                purchase_no=ids,
+                purchase_date=obj.ro_date,
+                revise_level=obj.edi_file_id.upload_seq,
+                item=obj.ro_item,
+                qty=obj.ro_qty,
+                created_by_id=request.user,
+                purchase_status="0",
+            )
+            # data.save()
+            print(data)
+            print(obj.id)
+            ordDetail = RequestOrderDetail.objects.filter(request_order_id__eq=obj)
+            for i in ordDetail:
+                print(i.id)
+        #     # 
+        #     # seq = 1
+        #     # for r in obj:
+        #     #     pDetail = PurchaseRequestDetail(purchase_request_id=data,request_order_id=r,product_id=r.product_id,seq=seq,qty=r.ro_qty,created_by_id=request.user)
+        #     #     pDetail.save()
+        #     #     seq += 1
+                
+        #     # ### Update status
+        #     # queryset.update(ro_status="2")
 
 
 @admin.action(description="Reset To Draff")
 def make_draff_request_order(modeladmin, request, queryset):
-    queryset.update(request_status="0")
+    queryset.update(ro_status="0")
 
 class ProductRequestOrderInline(admin.TabularInline):
     model = RequestOrderDetail
     readonly_fields = (
         'product_id',
         'request_qty',
+        'balance_qty',
         'request_status',
         'updated_at',
     )
+    
     fields = [
         'product_id',
         'request_qty',
+        'balance_qty',
         'request_status',
         'updated_at',
+        'is_selected'
     ]
-    extra = 1
-    can_delete = False
+    
+    # def updated_on(self, obj):
+    #     # return obj.updated_on.strftime("%d %b %Y %H:%M:%S")
+    #     return obj.updated_at.strftime("%d-%m-%Y %H:%M:%S")
+    max_num = 0
+    extra = 0
+    can_delete = True
     can_add = False
     show_change_link = True
     
@@ -208,8 +220,13 @@ class RequestOrderAdmin(admin.ModelAdmin):
 
     list_filter = ['edi_file_id', 'supplier_id','product_group_id','book_id','ro_status']
 
+    list_select_related = ['edi_file_id']
+    
+    search_fields = ['ro_no', 'supplier_id']
+    
     list_display = [
         'ro_no',
+        'get_revise_status',
         'book_id',
         'req_date',
         'product_group_id',
@@ -265,10 +282,10 @@ class RequestOrderAdmin(admin.ModelAdmin):
         # return obj.updated_on.strftime("%d %b %Y %H:%M:%S")
         return obj.updated_at.strftime("%d-%m-%Y %H:%M:%S")
 
-    # def get_model_data(self, obj):
-    #     return obj.edi_file_id.product_group_id
+    def get_revise_status(self, obj):
+        return obj.edi_file_id.upload_seq
 
-    # get_model_data.short_description = 'Model'
+    get_revise_status.short_description = 'Revise'
 
     def qty(self, obj):
         return f'{obj.ro_qty:,}'
