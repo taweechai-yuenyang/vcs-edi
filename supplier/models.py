@@ -18,7 +18,7 @@ class OrderType(models.Model):
     
     class Meta:
         db_table = "tbmOrderType"
-        verbose_name = "ข้อมูล Order Type"
+        verbose_name = "Order Type"
         verbose_name_plural = "Order Type"
         
 class ProductType(models.Model):
@@ -36,7 +36,7 @@ class ProductType(models.Model):
     
     class Meta:
         db_table = "tbmProductType"
-        verbose_name = "ข้อมูล Product Type"
+        verbose_name = "Product Type"
         verbose_name_plural = "Product Type"
         
 class ProductGroup(models.Model):
@@ -54,7 +54,7 @@ class ProductGroup(models.Model):
     
     class Meta:
         db_table = "tbmProductGroup"
-        verbose_name = "ข้อมูล Product Group"
+        verbose_name = "Product Group"
         verbose_name_plural = "Product Group"
         
 class Unit(models.Model):
@@ -72,7 +72,7 @@ class Unit(models.Model):
     
     class Meta:
         db_table = "tbmUnit"
-        verbose_name = "ข้อมูล Unit"
+        verbose_name = "Unit"
         verbose_name_plural = "Unit"
         
 class Section(models.Model):
@@ -90,7 +90,7 @@ class Section(models.Model):
     
     class Meta:
         db_table = "tbmSection"
-        verbose_name = "ข้อมูล Section"
+        verbose_name = "Section"
         verbose_name_plural = "Section"
         
 class Position(models.Model):
@@ -108,7 +108,7 @@ class Position(models.Model):
     
     class Meta:
         db_table = "tbmPosition"
-        verbose_name = "ข้อมูล Position"
+        verbose_name = "Position"
         verbose_name_plural = "Position"
 
 class Department(models.Model):
@@ -126,7 +126,7 @@ class Department(models.Model):
     
     class Meta:
         db_table = "tbmDepartment"
-        verbose_name = "ข้อมูล Department"
+        verbose_name = "Department"
         verbose_name_plural = "Department"
         
         
@@ -148,7 +148,7 @@ class Book(models.Model):
     
     class Meta:
         db_table = "tbmBook"
-        verbose_name = "ข้อมูล Book"
+        verbose_name = "Book"
         verbose_name_plural = "Book"
         
 class Product(models.Model):
@@ -169,7 +169,7 @@ class Product(models.Model):
     
     class Meta:
         db_table = "tbmProduct"
-        verbose_name = "ข้อมูล Product"
+        verbose_name = "Product"
         verbose_name_plural = "Product"
         
 class ManagementUser(AbstractUser):
@@ -193,7 +193,7 @@ class ManagementUser(AbstractUser):
         # app_label = "budgetaaa"
         # ordering = ('-updated_on','code','name')
         db_table = "ediUser"
-        verbose_name = "ข้อมูล User"
+        verbose_name = "User"
         verbose_name_plural = "User"
     
 class Supplier(models.Model):
@@ -215,5 +215,5 @@ class Supplier(models.Model):
         # app_label = "budgetaaa"
         # ordering = ('-updated_on','code','name')
         db_table = "tbmSupplier"
-        verbose_name = "ข้อมูล Supplier"
+        verbose_name = "Supplier"
         verbose_name_plural = "Supplier"

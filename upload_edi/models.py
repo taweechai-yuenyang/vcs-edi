@@ -13,29 +13,25 @@ REVISE_LEVEL = [
     ('5', 'Revise 5'),
 ]
 
-EDI_REQUEST_STATUS = [
+EDI_REQUEST_ORDER_STATUS = [
     ('0', 'Draff'),
     ('1', 'In Process'),
     ('2', 'Success'),
+    ('3', 'Failure'),
 ]
 
 PURCHASE_STATUS = [
     ('0', 'Draff'),
-    ('1', 'Wait for Approve'),
-    ('2', 'Purchase Order'),
-    ('3', 'Approve'),
-    ('4', 'Cancel'),
-    ('5', 'Reject'),
-    ('6', 'Revise')
+    ('1', 'In Process'),
+    ('2', 'Success'),
+    ('3', 'Failure'),
 ]
 
 PURCHASE_ORDER_STATUS = [
     ('0', 'Draff'),
-    ('1', 'Wait for Approve'),
-    ('2', 'Approve'),
-    ('3', 'Cancel'),
-    ('4', 'Reject'),
-    ('5', 'Revise')
+    ('1', 'In Process'),
+    ('2', 'Success'),
+    ('3', 'Failure'),
 ]
 
 # Create your models here.
@@ -60,8 +56,8 @@ class UploadEDI(models.Model):
     
     class Meta:
         db_table = "ediFileUpload"
-        verbose_name = "UploadFileEDI"
-        verbose_name_plural = "Upload File EDI"
+        verbose_name = "FileEDI"
+        verbose_name_plural = "1.Upload File EDI"
         
 class RequestOrder(models.Model):
     # REQUEST ORDER
@@ -76,27 +72,31 @@ class RequestOrder(models.Model):
     ro_item = models.IntegerField(verbose_name="Item", blank=True,null=True, default="0")
     ro_qty = models.FloatField(verbose_name="Qty.", blank=True,null=True, default="0")
     ro_by_id = models.ForeignKey(ManagementUser, verbose_name="Request By ID", blank=True, null=True, on_delete=models.SET_NULL)
-    ro_status = models.CharField(max_length=1, choices=EDI_REQUEST_STATUS,verbose_name="Request Status", default="0")
+    ro_status = models.CharField(max_length=1, choices=EDI_REQUEST_ORDER_STATUS,verbose_name="Request Status", default="0")
     ref_formula_id = models.CharField(max_length=8, verbose_name="Ref. Formula ID", blank=True, null=True)
     is_sync = models.BooleanField(verbose_name="Is Sync", default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
+    def __str__(self):
+        return self.ro_no
     
     class Meta:
         db_table = "ediRO"
-        verbose_name = "Request Order"
-        verbose_name_plural = "Request Order"
-        ordering = ('ro_date','ro_no')
+        verbose_name = "RO"
+        verbose_name_plural = "2.Request Order"
+        ordering = ('ro_status','ro_date','ro_no')
         
 class RequestOrderDetail(models.Model):
     id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
     request_order_id = models.ForeignKey(RequestOrder, verbose_name="Request ID", blank=False, null=False, on_delete=models.CASCADE)
     product_id = models.ForeignKey(Product, verbose_name="Product ID", blank=False, null=False, on_delete=models.CASCADE)
+    seq = models.IntegerField(verbose_name="Sequence", blank=True, null=True,default="0")
     request_qty = models.FloatField(verbose_name="Request Qty.", default="0.0")
     balance_qty = models.FloatField(verbose_name="Balance Qty.", default="0.0")
     request_by_id = models.ForeignKey(ManagementUser, verbose_name="Request By ID", blank=True, null=True, on_delete=models.SET_NULL)
-    request_status = models.CharField(max_length=1, choices=EDI_REQUEST_STATUS,verbose_name="Request Status", default="0")
+    request_status = models.CharField(max_length=1, choices=EDI_REQUEST_ORDER_STATUS,verbose_name="Request Status", default="0")
+    remark = models.TextField(verbose_name="Remark", blank=True, null=True)
     is_selected = models.BooleanField(verbose_name="Is Selected", default=True)
     is_sync = models.BooleanField(verbose_name="Is Sync", default=False)
     ref_formula_id = models.CharField(max_length=8, verbose_name="Ref. Formula ID", blank=True, null=True)
@@ -104,16 +104,16 @@ class RequestOrderDetail(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     def __unicode__(self):
-        return self.product_id
+        return self.seq
     
     def __str__(self):
-        return self.product_id
+        return str(self.id)
     
     class Meta:
         db_table = "ediRODetail"
-        verbose_name = "Request Order Detail"
+        verbose_name = "RO Detail"
         verbose_name_plural = "Request Order Detail"
-        ordering = ('product_id','created_at','updated_at')
+        ordering = ('seq','product_id','created_at','updated_at')
         
 
         
@@ -122,13 +122,13 @@ class ApproveRequestOrder(models.Model):
     request_order_id = models.ForeignKey(RequestOrder, verbose_name="Request ID", blank=False, null=False, on_delete=models.CASCADE)
     request_by_id = models.ForeignKey(ManagementUser, verbose_name="Request By ID", blank=True, null=True, on_delete=models.SET_NULL)
     description = models.TextField(verbose_name="Description", blank=True, null=True)
-    request_status = models.CharField(max_length=1, choices=EDI_REQUEST_STATUS,verbose_name="Request Status", default="0")
+    request_status = models.CharField(max_length=1, choices=EDI_REQUEST_ORDER_STATUS,verbose_name="Request Status", default="0")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
         db_table = "ediROApprove"
-        verbose_name = "Approve Request Order"
+        verbose_name = "Approve RO"
         verbose_name_plural = "Approve Request Order"
         
 # เปิด PR
@@ -156,18 +156,20 @@ class PurchaseRequest(models.Model):
     
     class Meta:
         db_table = "ediPR"
-        verbose_name = "Purchase Request"
-        verbose_name_plural = "Purchase Request"
+        verbose_name = "PR"
+        verbose_name_plural = "3.Purchase Request"
+        ordering = ('purchase_status','purchase_no','purchase_date')
         
 class PurchaseRequestDetail(models.Model):
     # PURCHASE REQUEST DETAIL
     id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
     purchase_request_id = models.ForeignKey(PurchaseRequest, verbose_name="Purchase Request ID", blank=False, null=False, on_delete=models.CASCADE)
-    request_order_id = models.ForeignKey(RequestOrder, verbose_name="Request Order ID", blank=True, null=True, on_delete=models.SET_NULL)
+    request_order_id = models.ForeignKey(RequestOrderDetail, verbose_name="Order Detail ID", blank=True, null=True, on_delete=models.SET_NULL)
     product_group_id = models.ForeignKey(ProductGroup, verbose_name="Model ID", on_delete=models.CASCADE)
     product_id = models.ForeignKey(Product, verbose_name="Product ID", blank=False, null=False, on_delete=models.CASCADE)
     seq = models.IntegerField(verbose_name="Sequence", blank=True, null=True,default="0")
     qty = models.FloatField(verbose_name="Qty.", default="0.0")
+    remark = models.TextField(verbose_name="Remark", blank=True, null=True)
     is_confirm = models.BooleanField(verbose_name="Confirmed", default=False)
     is_sync = models.BooleanField(verbose_name="Status Sync", default=False)
     ref_formula_id = models.CharField(max_length=8, verbose_name="Ref. Formula ID", blank=True, null=True)
@@ -175,9 +177,12 @@ class PurchaseRequestDetail(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
+    def __str__(self):
+        return f"{self.id}"
+    
     class Meta:
         db_table = "ediPRDetail"
-        verbose_name = "Purchase Request Detail"
+        verbose_name = "PR Detail"
         verbose_name_plural = "Purchase Request Detail"
         ordering = ['purchase_request_id','seq']
         
@@ -192,7 +197,7 @@ class ApprovePurchaseRequest(models.Model):
     
     class Meta:
         db_table = "ediPRApprove"
-        verbose_name = "Approve Purchase Request"
+        verbose_name = "Approve PR"
         verbose_name_plural = "Approve Purchase Request"
         
 # # PurchaseOrder
@@ -204,7 +209,7 @@ class PurchaseOrder(models.Model):
     order_date = models.DateField(verbose_name="Order Date", blank=False, null=False)
     item = models.IntegerField(verbose_name="Item", default="0")
     qty = models.FloatField(verbose_name="Qty.", default="0.0")
-    order_status = models.CharField(max_length=1, verbose_name="Order Status", default="0")
+    order_status = models.CharField(max_length=1, choices=PURCHASE_ORDER_STATUS,verbose_name="Order Status", default="0")
     description = models.TextField(verbose_name="Description", default="-", blank=True, null=True)
     is_sync = models.BooleanField(verbose_name="Is Sync", default=False)
     created_by_id = models.ForeignKey(ManagementUser, verbose_name="Created By ID", blank=True, null=True, on_delete=models.SET_NULL)
@@ -212,10 +217,13 @@ class PurchaseOrder(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
+    def __str__(self):
+        return self.order_no
+    
     class Meta:
         db_table = "ediPO"
-        verbose_name = "Purchase Order"
-        verbose_name_plural = "Purchase Order"
+        verbose_name = "PO"
+        verbose_name_plural = "4.Purchase Order"
         
 class PurchaseOrderDetail(models.Model):
     # PURCHASE ORDER DETAIL
@@ -223,7 +231,9 @@ class PurchaseOrderDetail(models.Model):
     purchase_order_id = models.ForeignKey(PurchaseOrder, verbose_name="Purchase Order ID", blank=False, null=False, on_delete=models.CASCADE)
     product_group_id = models.ForeignKey(ProductGroup, verbose_name="Model ID", on_delete=models.CASCADE)
     product_id = models.ForeignKey(Product, verbose_name="Product ID", blank=False, null=False, on_delete=models.CASCADE)
+    seq = models.IntegerField(verbose_name="Sequence", blank=True, null=True,default="0")
     qty = models.FloatField(verbose_name="Qty.", default="0.0")
+    remark = models.TextField(verbose_name="Remark", blank=True, null=True)
     is_active = models.BooleanField(verbose_name="Is Active", default=False)
     is_sync = models.BooleanField(verbose_name="Is Sync", default=False)
     created_by_id = models.ForeignKey(ManagementUser, verbose_name="Created By ID", blank=True, null=True, on_delete=models.SET_NULL)
@@ -231,10 +241,14 @@ class PurchaseOrderDetail(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
+    def __str__(self):
+        return self.product_id
+    
     class Meta:
         db_table = "ediPODetail"
-        verbose_name = "Purchase Order Detail"
+        verbose_name = "PO Detail"
         verbose_name_plural = "Purchase Order Detail"
+        ordering = ['purchase_order_id','seq']
         
 class ApprovePurchaseOrder(models.Model):
     id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
@@ -247,5 +261,5 @@ class ApprovePurchaseOrder(models.Model):
     
     class Meta:
         db_table = "ediPOApprove"
-        verbose_name = "Approve Purchase Order"
+        verbose_name = "Approve PO"
         verbose_name_plural = "Approve Purchase Order"

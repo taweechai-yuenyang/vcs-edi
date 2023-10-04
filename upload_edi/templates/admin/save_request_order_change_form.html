@@ -1,0 +1,14 @@
+{% extends "admin/change_form.html" %}
+
+{% comment %} {% block form_top %}
+    {{ lame_static_text }}
+    <a href="http://example.com/abc/{{ obj.id }}?"/>View Website</a>
+{% endblock %} {% endcomment %}
+{% block submit_buttons_bottom %} 
+{{block.super }}
+<div class="pt-3">
+    <div class="form-group">
+        <input type="submit" class="btn btn-danger btn-sm form-control" value="Create Purchase Request" name="_send_to_pr" />
+    </div>
+<div>
+{% endblock %}

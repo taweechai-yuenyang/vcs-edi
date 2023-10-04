@@ -1,6 +1,7 @@
 from io import BytesIO
 from typing import Any
 from django.contrib import admin, messages
+from admin_confirm import AdminConfirmMixin
 from django.db.models.query import QuerySet
 from django.http.request import HttpRequest
 from django.shortcuts import redirect
@@ -8,19 +9,22 @@ from django.utils.html import format_html
 import pandas as pd
 
 from supplier.models import Book, OrderType, Product, ProductGroup
-from .models import EDI_REQUEST_STATUS, PurchaseOrder, PurchaseRequest, PurchaseRequestDetail, RequestOrder, RequestOrderDetail, UploadEDI
+from .models import EDI_REQUEST_ORDER_STATUS, PURCHASE_ORDER_STATUS, PurchaseOrder, PurchaseOrderDetail, PurchaseRequest, PurchaseRequestDetail, RequestOrder, RequestOrderDetail, UploadEDI
 # from .models import UploadEDI, PurchaseRequest, PurchaseOrder, RequestOrder
 
 # Register your models here.
 
 
-@admin.action(description="Mark selected as Purchase Request")
+@admin.action(description="Mark selected as Purchase Request", permissions=["change"])
 def make_request_request(modeladmin, request, queryset):
     queryset.update(status="p")
 
 
 class UploadEDIAdmin(admin.ModelAdmin):
     # fields = ('section_id', 'book_id', 'supplier_id', 'product_group_id','edi_file','upload_date','upload_seq','description',)
+    confirm_change = True
+    confirmation_fields = ['edi_filename', 'is_generated']
+
     actions = [make_request_request]
 
     list_filter = ['is_generated', 'document_no', 'edi_filename', 'upload_seq']
@@ -66,16 +70,18 @@ class UploadEDIAdmin(admin.ModelAdmin):
             for r in data:
                 if float(r[5]) > 0:
                     partID = Product.objects.get(code=str(r[3]).strip())
-                    addData.append({"partName": partID, "group_id": partID.prod_group_id,"qty": r[5]})
-                    
+                    addData.append({"partName": partID, "group_id": partID.prod_group_id,
+                                   "qty": r[5], "remark": str(r[1]).strip()})
+
             # show Message
             try:
                 super().save_model(request, obj, form, change)
                 for r in addData:
-                    ### Filter Request Order Header
+                    # Filter Request Order Header
                     ordID = None
                     try:
-                        ordID = RequestOrder.objects.get(supplier_id=obj.supplier_id,section_id=request.user.section_id,product_group_id=r["group_id"],book_id=obj.book_id,ro_date=obj.upload_date)
+                        ordID = RequestOrder.objects.get(supplier_id=obj.supplier_id, section_id=request.user.section_id,
+                                                         product_group_id=r["group_id"], book_id=obj.book_id, ro_date=obj.upload_date)
                     except Exception as e:
                         rndNo = f"RO{str(obj.upload_date.strftime('%Y%m%d'))[3:]}"
                         rnd = f"{rndNo}{(RequestOrder.objects.filter(ro_no__gte=rndNo).count() + 1):05d}"
@@ -91,30 +97,40 @@ class UploadEDIAdmin(admin.ModelAdmin):
                             ro_status="0")
                         ordID.save()
                         pass
-                    
-                    ### Create Detail
-                    ordDetail = RequestOrderDetail(request_order_id=ordID,product_id=r["partName"],request_qty=r["qty"],balance_qty=r["qty"],request_by_id=request.user,request_status="0")
+
+                    # Create Detail
+                    ordDetail = RequestOrderDetail(request_order_id=ordID, product_id=r["partName"], request_qty=r[
+                                                   "qty"], balance_qty=r["qty"], request_by_id=request.user, request_status="0", remark=r["remark"])
                     ordDetail.save()
-                    
-                    ### Update Qty/Item Request Order
-                    orderDetail = RequestOrderDetail.objects.filter(request_order_id=ordID)
+
+                    # Update Qty/Item Request Order
+                    orderDetail = RequestOrderDetail.objects.filter(
+                        request_order_id=ordID)
                     qty = 0
                     item = 0
+                    seq = 1
                     for r in orderDetail:
-                        qty +=r.request_qty
+                        qty += r.request_qty
                         item += 1
-                    
-                    ordID.edi_file_id=obj 
+                        # Update Seq Order Seq
+                        r.seq = seq
+                        r.save()
+                        seq += 1
+
+                    ordID.edi_file_id = obj
                     ordID.ro_item = item
                     ordID.ro_qty = qty
                     ordID.save()
-                        
+
                 obj.is_generated = True
                 obj.save()
                 messages.success(
                     request, f'อัพโหลดเอกสาร {obj.edi_filename} เลขที่ {documentNo} เรียบร้อยแล้ว')
-                return redirect('/admin/upload_edi/requestorder/')
-            
+
+                # SendNotifiedMessage
+
+                # return redirect('/admin/upload_edi/requestorder/')
+
             except Exception as e:
                 # messages.error(request, f'เกิดข้อผิดพลาดในการอัพโหลดเอกสาร')
                 messages.error(request, str(e))
@@ -137,60 +153,102 @@ class UploadEDIAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.action(description="Mark selected as Purchase Request")
+@admin.action(description="Mark selected as Purchase Request", permissions=["change"])
 def make_purchase_request(modeladmin, request, queryset):
-    data = queryset
-    for obj in data:
-        if int(obj.ro_status) < 2:
-            # print(obj[0].edi_file_id)
-            dte = f'PR{obj.ro_date.strftime("%Y%m%d")[3:]}'
-            rnd = PurchaseRequest.objects.filter(purchase_no__gte=dte).count() + 1
-            ids = f"{dte}{rnd:05d}"
-            data = PurchaseRequest(
-                edi_file_id=obj.edi_file_id,
-                section_id=request.user.section_id,
-                book_id=obj.book_id,
-                supplier_id=obj.supplier_id,
-                purchase_no=ids,
-                purchase_date=obj.ro_date,
-                revise_level=obj.edi_file_id.upload_seq,
-                item=obj.ro_item,
-                qty=obj.ro_qty,
-                created_by_id=request.user,
-                purchase_status="0",
-            )
-            # data.save()
-            print(data)
-            print(obj.id)
-            ordDetail = RequestOrderDetail.objects.filter(request_order_id__eq=obj)
-            for i in ordDetail:
-                print(i.id)
-        #     # 
-        #     # seq = 1
-        #     # for r in obj:
-        #     #     pDetail = PurchaseRequestDetail(purchase_request_id=data,request_order_id=r,product_id=r.product_id,seq=seq,qty=r.ro_qty,created_by_id=request.user)
-        #     #     pDetail.save()
-        #     #     seq += 1
-                
-        #     # ### Update status
-        #     # queryset.update(ro_status="2")
+    try:
+        data = queryset
+        for obj in data:
+            if int(obj.ro_status) < 2:
+                # print(obj[0].edi_file_id)
+                dte = f'PR{obj.ro_date.strftime("%Y%m%d")[3:]}'
+                rnd = PurchaseRequest.objects.filter(
+                    purchase_no__gte=dte).count() + 1
+                ids = f"{dte}{rnd:05d}"
+                pr = PurchaseRequest(
+                    request_order_id=obj,
+                    section_id=request.user.section_id,
+                    book_id=obj.book_id,
+                    supplier_id=obj.supplier_id,
+                    purchase_no=ids,
+                    purchase_date=obj.ro_date,
+                    revise_level=obj.edi_file_id.upload_seq,
+                    item=obj.ro_item,
+                    qty=obj.ro_qty,
+                    created_by_id=request.user,
+                    purchase_status="0",
+                )
+                pr.save()
+
+                # Get Order Details
+                ordDetail = RequestOrderDetail.objects.filter(
+                    request_order_id=obj).all()
+                seq = 1
+                qty = 0
+                for i in ordDetail:
+                    if i.is_selected:
+                        pDetail = PurchaseRequestDetail(
+                            purchase_request_id=pr,
+                            request_order_id=i,
+                            product_group_id=i.product_id.prod_group_id,
+                            product_id=i.product_id,
+                            seq=seq,
+                            qty=i.request_qty,
+                            remark=i.remark,
+                            is_confirm=False,
+                            is_sync=False,
+                            created_by_id=request.user,
+                        )
+                        pDetail.save()
+                        # Update Status Order Details
+                        i.request_status = "2"
+                        i.save()
+
+                        # Summary Seq/Qty
+                        seq += 1
+                        qty += i.request_qty
+
+            # Update PR Qty
+            pr.item = seq-1
+            pr.qty = qty
+            pr.save()
+
+            # Check Order Status
+            obj_status = "2"  # กรณีที่ครบ
+            if obj.ro_item != (seq - 1):
+                obj_status = "1"  # กรณีที่ไม่ครบ
+
+            # Update Order Status
+            queryset.update(ro_status=obj_status)
+            messages.success(
+                request, f'เพิ่มข้อมูล PR เอกสารเลขที่ {pr} เรียบร้อยแล้ว')
+
+            # SendNotifiedMessage
+
+    except:
+        # Update Order Status When Error
+        queryset.update(ro_status="3")
+        messages.error(request, "เกิดข้อผิดพลาดระหว่างการบันทึกข้อมูล!")
+        pass
 
 
-@admin.action(description="Reset To Draff")
+@admin.action(description="Reset To Draff", permissions=["change"])
 def make_draff_request_order(modeladmin, request, queryset):
     queryset.update(ro_status="0")
+
 
 class ProductRequestOrderInline(admin.TabularInline):
     model = RequestOrderDetail
     readonly_fields = (
+        'seq',
         'product_id',
         'request_qty',
         'balance_qty',
         'request_status',
         'updated_at',
     )
-    
+
     fields = [
+        'seq',
         'product_id',
         'request_qty',
         'balance_qty',
@@ -198,7 +256,7 @@ class ProductRequestOrderInline(admin.TabularInline):
         'updated_at',
         'is_selected'
     ]
-    
+
     # def updated_on(self, obj):
     #     # return obj.updated_on.strftime("%d %b %Y %H:%M:%S")
     #     return obj.updated_at.strftime("%d-%m-%Y %H:%M:%S")
@@ -207,23 +265,35 @@ class ProductRequestOrderInline(admin.TabularInline):
     can_delete = True
     can_add = False
     show_change_link = True
-    
+
     def has_change_permission(self, request, obj):
         return True
-    
+
     def has_add_permission(self, request, obj):
         return False
-    
-class RequestOrderAdmin(admin.ModelAdmin):
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        print(request.build_absolute_uri)
+        # for i in qs:
+        #     print(f"{i.request_order_id} ID: {i.id} STATUS: {i.request_status}")
+
+        return qs.filter(request_status__lte="1")
+
+
+class RequestOrderAdmin(AdminConfirmMixin, admin.ModelAdmin):
+    change_form_template = 'admin/save_request_order_change_form.html'
+    confirm_change = True
+    confirmation_fields = ['ro_status']
     inlines = [ProductRequestOrderInline]
     actions = [make_draff_request_order, make_purchase_request]
 
-    list_filter = ['edi_file_id', 'supplier_id','product_group_id','book_id','ro_status']
-
+    list_filter = ['edi_file_id', 'supplier_id',
+                   'product_group_id', 'book_id', 'ro_status']
     list_select_related = ['edi_file_id']
-    
     search_fields = ['ro_no', 'supplier_id']
-    
+    list_per_page = 25
+
     list_display = [
         'ro_no',
         'get_revise_status',
@@ -248,8 +318,16 @@ class RequestOrderAdmin(admin.ModelAdmin):
         'ro_status',
     ]
 
+    def get_readonly_fields(self, request, obj):
+        lst = ('product_group_id', 'supplier_id',
+               'ro_no', 'ro_item', 'ro_qty', 'ro_status',)
+        if int(obj.ro_status) == 2:
+            lst += ('book_id', 'ro_date',)
+
+        return lst
+
     def status(self, obj):
-        data = EDI_REQUEST_STATUS[int(obj.ro_status)]
+        data = EDI_REQUEST_ORDER_STATUS[int(obj.ro_status)]
         txtClass = "text-danger"
         if int(obj.ro_status) == 0:
             txtClass = "text-primary"
@@ -294,17 +372,101 @@ class RequestOrderAdmin(admin.ModelAdmin):
         return f'{obj.balance_qty:,}'
 
     def get_queryset(self, request):
-        print(request)
         qs = super().get_queryset(request)
         return qs
 
+    # Set Overrides Message
+    def message_user(self, request, message, level=messages.INFO, extra_tags='', fail_silently=False):
+        pass
+
+    # Create Overrides Save Methods
+    def save_model(self, request, obj, form, change):
+        return super().save_model(request, obj, form, change)
+
+    # Overrides Update Methods
+    def response_change(self, request, obj):
+        if "_send_to_pr" in request.POST:
+            if int(obj.ro_status) < 2:
+                dte = f'PR{obj.ro_date.strftime("%Y%m%d")[3:]}'
+                rnd = PurchaseRequest.objects.filter(
+                    purchase_no__gte=dte).count() + 1
+                ids = f"{dte}{rnd:05d}"
+                pr = PurchaseRequest(
+                    request_order_id=obj,
+                    section_id=request.user.section_id,
+                    book_id=obj.book_id,
+                    supplier_id=obj.supplier_id,
+                    purchase_no=ids,
+                    purchase_date=obj.ro_date,
+                    revise_level=obj.edi_file_id.upload_seq,
+                    item=obj.ro_item,
+                    qty=obj.ro_qty,
+                    created_by_id=request.user,
+                    purchase_status="0",
+                )
+                pr.save()
+
+                # Get Order Details
+                ordDetail = RequestOrderDetail.objects.filter(
+                    request_order_id=obj).all()
+                seq = 1
+                qty = 0
+                for i in ordDetail:
+                    if i.is_selected and i.request_status == "0":
+                        pDetail = PurchaseRequestDetail(
+                            purchase_request_id=pr,
+                            request_order_id=i,
+                            product_group_id=i.product_id.prod_group_id,
+                            product_id=i.product_id,
+                            seq=seq,
+                            qty=i.request_qty,
+                            remark=i.remark,
+                            is_confirm=False,
+                            is_sync=False,
+                            created_by_id=request.user,
+                        )
+                        pDetail.save()
+                        # Update Status Order Details
+                        i.request_status = "2"
+                        i.save()
+
+                        # Summary Seq/Qty
+                        seq += 1
+                        qty += i.request_qty
+
+                # Update PR Qty
+                pr.item = seq-1
+                pr.qty = qty
+                pr.save()
+
+                # Check Order Status
+                obj.ro_status = "2"
+                if int(obj.ro_status) == 0:
+                    obj_status = "2"  # กรณีที่ครบ
+                    if obj.ro_item != (seq - 1):
+                        obj_status = "1"  # กรณีที่ไม่ครบ
+
+                    # Update Order Status
+                    obj.ro_status = obj_status
+
+                obj.save()
+                messages.success(
+                    request, f'เพิ่มข้อมูล PR เอกสารเลขที่ {pr} เรียบร้อยแล้ว')
+
+                # SendNotifiedMessage
+
+        return super().response_change(request, object)
+
     pass
+
 
 class ProductPurchaseRequestInline(admin.TabularInline):
     model = PurchaseRequestDetail
-    readonly_fields = ('seq','product_id','qty','is_confirm')
+    readonly_fields = ('seq', 'product_group_id',
+                       'product_id', 'qty', 'is_confirm')
     fields = [
         'seq',
+        'product_group_id',
         'product_id',
         'qty',
         'is_confirm'
@@ -314,14 +476,52 @@ class ProductPurchaseRequestInline(admin.TabularInline):
     can_add = False
     show_change_link = True
     sortable_by = 'seq'
-    
+
     def has_add_permission(self, request, obj):
         return False
 
 
-class PurchaseRequestAdmin(admin.ModelAdmin):
+@admin.action(description="Create Purchase Order", permissions=["change"])
+def make_purchase_order(modeladmin, request, queryset):
+    data = queryset
+    for obj in data:
+        pref = f"RO{obj.purchase_date.strftime('%Y%m%d')[3:]}"
+        rnd = PurchaseOrder.objects.filter(order_no__gte=pref).count() + 1
+        ids = f"{pref}{rnd:05d}"
+        poHeader = PurchaseOrder(purchase_id=obj, order_no=ids, order_date=obj.purchase_date, item=obj.item,
+                                 qty=obj.qty, order_status="0", description=obj.description, created_by_id=request.user)
+        poHeader.save()
+        prDetail = PurchaseRequestDetail.objects.filter(
+            purchase_request_id=obj).all()
+        for pr in prDetail:
+            poDetail = PurchaseOrderDetail(
+                purchase_order_id=poHeader,
+                product_group_id=pr.product_group_id,
+                product_id=pr.product_id,
+                seq=pr.seq,
+                qty=pr.qty,
+                remark=pr.remark,
+                is_active=True,
+                created_by_id=request.user
+            )
+            poDetail.save()
+
+            # Update Purchase Request
+            pr.is_confirm = True
+            pr.save()
+
+    queryset.update(purchase_status="2")
+    messages.success(
+        request, f'เพิ่มข้อมูล PO เอกสารเลขที่ {poHeader} เรียบร้อยแล้ว')
+
+
+class PurchaseRequestAdmin(AdminConfirmMixin, admin.ModelAdmin):
+    confirm_change = True
+    confirmation_fields = ['field1', 'field2']
+    actions = [make_purchase_order]
+
     inlines = [ProductPurchaseRequestInline]
-    list_filter = ['section_id','book_id','supplier_id','purchase_date',]
+    list_filter = ['section_id', 'book_id', 'supplier_id', 'purchase_date',]
     list_display = [
         'purchase_no',
         'req_date',
@@ -335,21 +535,12 @@ class PurchaseRequestAdmin(admin.ModelAdmin):
         'created_on',
         'updated_on',
     ]
-    
+
     date_hierarchy = "purchase_date"
-    
-    # edi_file_id
-    # section_id
-    # book_id
-    # supplier_id
-    # product_group_id
-    # purchase_no
-    # purchase_date
-    # revise_level
-    # item0
-    # qty
-    # description
-    fields = [("purchase_no", "revise_level"),"purchase_date", ("item","qty"),"description"]
+    list_select_related = ['request_order_id']
+
+    fields = [("purchase_no", "revise_level"),"purchase_date", ("item", "qty"), "description"]
+    readonly_fields = ["purchase_no", "revise_level","purchase_date","item", "qty", "description"]
     # fieldsets = [
     #     (
     #         None,
@@ -366,7 +557,7 @@ class PurchaseRequestAdmin(admin.ModelAdmin):
     #         },
     #     ),
     # ]
-    
+
     def req_date(self, obj):
         return obj.purchase_date.strftime("%d-%m-%Y")
     req_date.short_description = "Date"
@@ -381,7 +572,110 @@ class PurchaseRequestAdmin(admin.ModelAdmin):
     updated_on.short_description = 'LastUpdate'
     pass
 
+
+class PurchaseOrderDetailInline(admin.TabularInline):
+    model = PurchaseOrderDetail
+    readonly_fields = [
+        "seq",
+        "product_group_id",
+        "product_id",
+        "qty",
+        "is_active",
+    ]
+
+    fields = [
+        "seq",
+        "product_group_id",
+        "product_id",
+        "qty",
+        "is_active",
+    ]
+
+    extra = 1
+    can_delete = False
+    can_add = False
+    show_change_link = True
+
+    def has_add_permission(self, request, obj):
+        return False
+
+
+@admin.action(description="Recheck Order")
+def recheck_order(modeladmin, request, queryset):
+    queryset.update(order_status="0")
+
+
 class PurchaseOrderAdmin(admin.ModelAdmin):
+    inlines = [PurchaseOrderDetailInline]
+    list_display = [
+        "order_no",
+        "req_date",
+        "item",
+        "qty",
+        "status",
+        "is_sync",
+        "updated_on",
+    ]
+
+    fields = [
+        "order_no",
+        "order_date",
+        "item",
+        "qty",
+        "order_status",
+        'description',
+    ]
+
+    list_filter = [
+        "purchase_id",
+        "order_date",
+        "order_status",
+    ]
+
+    readonly_fields = [
+        "order_no",
+        "item",
+        "qty",
+        "order_status",
+    ]
+    search_fields = ["order_no"]
+    date_hierarchy = "order_date"
+    actions = [recheck_order]
+    list_per_page = 25
+    
+    def req_date(self, obj):
+        return obj.order_date.strftime("%d-%m-%Y")
+    
+    req_date.short_description = "Date"
+    
+    def created_on(self, obj):
+        return obj.created_at.strftime("%d-%m-%Y %H:%M:%S")
+    created_on.short_description = 'Created At'
+
+    def updated_on(self, obj):
+        # return obj.updated_on.strftime("%d %b %Y %H:%M:%S")
+        return obj.updated_at.strftime("%d-%m-%Y %H:%M:%S")
+    updated_on.short_description = 'LastUpdate'
+    
+    def status(self, obj):
+        data = PURCHASE_ORDER_STATUS[int(obj.order_status)]
+        txtClass = "text-danger"
+        if int(obj.order_status) == 0:
+            txtClass = "text-primary"
+
+        elif int(obj.order_status) == 1:
+            txtClass = "text-info"
+
+        elif int(obj.order_status) == 2:
+            txtClass = "text-success"
+
+        elif int(obj.order_status) == 3:
+            txtClass = "text-danger"
+
+        elif int(obj.order_status) == 4:
+            txtClass = "text-info"
+
+        return format_html(f"<span class='{txtClass}'>{data[1]}</span>")
     pass
 
 

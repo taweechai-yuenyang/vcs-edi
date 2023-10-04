@@ -379,7 +379,7 @@ class ManagementUserAdmin(UserAdmin):
         })
     )
     
-    def save_model(self, request, obj, form, change) -> None:
+    def save_model(self, request, obj, form, change):
         if obj.department_id is None:
             dp = Department.objects.get(code="-")
             obj.department_id = dp
