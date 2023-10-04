@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "djoser",
     "rest_framework",
     'rest_framework_simplejwt',
+    'formula_vcst.apps.FormulaVcstConfig',
 ]
 
 MIDDLEWARE = [

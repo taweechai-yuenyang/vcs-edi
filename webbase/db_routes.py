@@ -20,8 +20,8 @@ class DBRouter:
         """
         Attempts to read auth and contenttypes models go to auth_db.
         """
-        if model._meta.app_label == "vcs_kanban":
-            return "kanban_vcst"
+        if model._meta.app_label == "formula_vcst":
+            return "FormulaVCST"
 
         return "default"
 
@@ -29,8 +29,8 @@ class DBRouter:
         """
         Attempts to write auth and contenttypes models go to auth_db.
         """
-        if model._meta.app_label == "vcs_kanban":
-            return "kanban_vcst"
+        if model._meta.app_label == "formula_vcst":
+            return "FormulaVCST"
 
         return "default"
 
@@ -59,7 +59,7 @@ class DBRouter:
         Make sure the auth and contenttypes apps only appear in the
         'auth_db' database.
         """
-        if app_label == "vcs_kanban":
+        if app_label == "formula_vcst":
             return None
 
         return True

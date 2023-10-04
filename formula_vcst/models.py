@@ -20,6 +20,43 @@ class SECT(models.Model):
         db_table = "SECT"
         app_label = "formula_vcst"
         
+class JOB(models.Model):
+    FCSKID = models.CharField(max_length=8, db_column="FCSKID", default=nanoid.generate(size=8), blank=True, null=True)
+    FCCODE = models.CharField(max_length=30, db_column="FCCODE")
+    FCNAME = models.CharField(max_length=30, db_column="FCNAME")
+    
+    class Meta:
+        db_table = "JOB"
+        app_label = "formula_vcst"
+        
+class BOOK(models.Model):
+    FCSKID = models.CharField(max_length=8, db_column="FCSKID", default=nanoid.generate(size=8), blank=True, null=True)
+    FCCODE = models.CharField(max_length=30, db_column="FCCODE")
+    FCNAME = models.CharField(max_length=30, db_column="FCNAME")
+    
+    class Meta:
+        db_table = "BOOK"
+        app_label = "formula_vcst"
+        
+class COOR(models.Model):
+    FCSKID = models.CharField(max_length=8, db_column="FCSKID", default=nanoid.generate(size=8), blank=True, null=True)
+    FCCODE = models.CharField(max_length=30, db_column="FCCODE")
+    FCNAME = models.CharField(max_length=30, db_column="FCNAME")
+    
+    class Meta:
+        db_table = "COOR"
+        app_label = "formula_vcst"
+        
+class PROD(models.Model):
+    FCSKID = models.CharField(max_length=8, db_column="FCSKID", default=nanoid.generate(size=8), blank=True, null=True)
+    FCCODE = models.CharField(max_length=30, db_column="FCCODE")
+    FCNAME = models.CharField(max_length=30, db_column="FCNAME")
+    FCPDGRP = models.CharField(max_length=30, db_column="FCPDGRP")
+    FCTYPE = models.CharField(max_length=30, db_column="FCTYPE")
+    class Meta:
+        db_table = "PROD"
+        app_label = "formula_vcst"
+        
 class OrderH(models.Model):
     FCDATASER = models.CharField(max_length=4, db_column="FCDATASER", default="$$$9")
     FCSKID = models.CharField(max_length=8, db_column="FCSKID", default=nanoid.generate(size=8), blank=True, null=True)
@@ -28,17 +65,17 @@ class OrderH(models.Model):
     FCREFTYPE = models.CharField(max_length=2, db_column="FCREFTYPE")### Reference PR/PO
     FCCORP = models.CharField(max_length=8, db_column="FCCORP", default="H2ZMtM8R")
     FCBRANCH = models.CharField(max_length=8, db_column="FCBRANCH", default="H2Z2kf01")
-    FCDEPT = models.CharField(max_length=8, db_column="FCDEPT")### Reference
-    FCSECT = models.CharField(max_length=8, db_column="FCSECT")### Reference
+    FCDEPT = models.CharField(max_length=8, db_column="FCDEPT")### Reference DEPT
+    FCSECT = models.CharField(max_length=8, db_column="FCSECT")### Reference SECT
     FCJOB = models.CharField(max_length=8, db_column="FCJOB", default="H2ZFfr02")
     FCSTEP = models.CharField(max_length=1, db_column="FCSTEP", default="P")
-    FCBOOK = models.CharField(max_length=8, db_column="FCSKID", default="JIXeqL01")
+    FCBOOK = models.CharField(max_length=8, db_column="FCBOOK", default="JIXeqL01")
     FCCODE = models.CharField(max_length=30, db_column="FCCODE")
     FCREFNO = models.CharField(max_length=35, db_column="FCREFNO")
     FCVATISOUT = models.CharField(max_length=1, db_column="FCVATISOUT", default="Y", blank=True, null=True)
     FCVATTYPE = models.CharField(max_length=1, db_column="FCVATTYPE", default="1", blank=True, null=True)
-    FCCOOR = models.CharField(max_length=8, db_column="FCCOOR")### Reference
-    FCCREATEBY = models.CharField(max_length=8, db_column="FCCREATEBY")### Reference
+    FCCOOR = models.CharField(max_length=8, db_column="FCCOOR")### Reference COOR
+    FCCREATEBY = models.CharField(max_length=8, db_column="FCCREATEBY")### Reference EMP
     FCCORRECTB = models.CharField(max_length=8, db_column="FCCORRECTB", default="$/")### Reference
     FCEAFTERR = models.CharField(max_length=1, db_column="FCEAFTERR", default="E")
     FCPROJ = models.CharField(max_length=8, db_column="FCPROJ", default="x/•ู((()")
