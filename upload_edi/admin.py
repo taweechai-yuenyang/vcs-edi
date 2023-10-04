@@ -184,41 +184,41 @@ def make_purchase_request(modeladmin, request, queryset):
                     request_order_id=obj).all()
                 seq = 1
                 qty = 0
+                lst = []
                 for i in ordDetail:
-                    if i.is_selected:
-                        pDetail = PurchaseRequestDetail(
-                            purchase_request_id=pr,
-                            request_order_id=i,
-                            product_group_id=i.product_id.prod_group_id,
-                            product_id=i.product_id,
-                            seq=seq,
-                            qty=i.request_qty,
-                            remark=i.remark,
-                            is_confirm=False,
-                            is_sync=False,
-                            created_by_id=request.user,
-                        )
-                        pDetail.save()
-                        # Update Status Order Details
-                        i.request_status = "2"
-                        i.save()
+                    pDetail = PurchaseRequestDetail(
+                        purchase_request_id=pr,
+                        request_order_id=i,
+                        product_group_id=i.product_id.prod_group_id,
+                        product_id=i.product_id,
+                        seq=seq,
+                        qty=i.request_qty,
+                        remark=i.remark,
+                        is_confirm=False,
+                        is_sync=False,
+                        created_by_id=request.user,
+                    )
+                    pDetail.save()
+                    # Update Status Order Details
+                    i.request_status = "2"
+                    i.save()
 
-                        # Summary Seq/Qty
-                        seq += 1
-                        qty += i.request_qty
+                    # Summary Seq/Qty
+                    seq += 1
+                    qty += i.request_qty
 
             # Update PR Qty
             pr.item = seq-1
             pr.qty = qty
             pr.save()
 
-            # Check Order Status
-            obj_status = "2"  # กรณีที่ครบ
-            if obj.ro_item != (seq - 1):
-                obj_status = "1"  # กรณีที่ไม่ครบ
+            # # Check Order Status
+            # obj_status = "2"  # กรณีที่ครบ
+            # if obj.ro_item != (seq - 1):
+            #     obj_status = "1"  # กรณีที่ไม่ครบ
 
             # Update Order Status
-            queryset.update(ro_status=obj_status)
+            queryset.update(ro_status="2")
             messages.success(
                 request, f'เพิ่มข้อมูล PR เอกสารเลขที่ {pr} เรียบร้อยแล้ว')
 
@@ -411,6 +411,7 @@ class RequestOrderAdmin(AdminConfirmMixin, admin.ModelAdmin):
                     request_order_id=obj).all()
                 seq = 1
                 qty = 0
+                balance_qty = 0
                 for i in ordDetail:
                     if i.is_selected and i.request_status == "0":
                         pDetail = PurchaseRequestDetail(
@@ -433,6 +434,8 @@ class RequestOrderAdmin(AdminConfirmMixin, admin.ModelAdmin):
                         # Summary Seq/Qty
                         seq += 1
                         qty += i.request_qty
+                    else:
+                        balance_qty += i.request_qty
 
                 # Update PR Qty
                 pr.item = seq-1
@@ -440,15 +443,14 @@ class RequestOrderAdmin(AdminConfirmMixin, admin.ModelAdmin):
                 pr.save()
 
                 # Check Order Status
-                obj.ro_status = "2"
-                if int(obj.ro_status) == 0:
-                    obj_status = "2"  # กรณีที่ครบ
-                    if obj.ro_item != (seq - 1):
-                        obj_status = "1"  # กรณีที่ไม่ครบ
+                obj_status = "2"  # กรณีที่ครบ
+                if obj.ro_item != pr.item:
+                    obj_status = "1"  # กรณีที่ไม่ครบ
+                # Update Order Status
+                obj.ro_status = obj_status
 
-                    # Update Order Status
-                    obj.ro_status = obj_status
-
+                obj.ro_item -= pr.item
+                obj.qty = balance_qty
                 obj.save()
                 messages.success(
                     request, f'เพิ่มข้อมูล PR เอกสารเลขที่ {pr} เรียบร้อยแล้ว')
