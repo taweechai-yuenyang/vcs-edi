@@ -7,6 +7,7 @@ from django.http.request import HttpRequest
 from django.shortcuts import redirect
 from django.utils.html import format_html
 import pandas as pd
+from formula_vcst.models import BOOK, OrderH
 
 from supplier.models import Book, OrderType, Product, ProductGroup
 from .models import EDI_REQUEST_ORDER_STATUS, PURCHASE_ORDER_STATUS, PurchaseOrder, PurchaseOrderDetail, PurchaseRequest, PurchaseRequestDetail, RequestOrder, RequestOrderDetail, UploadEDI
@@ -177,14 +178,17 @@ def make_purchase_request(modeladmin, request, queryset):
                     created_by_id=request.user,
                     purchase_status="0",
                 )
-                pr.save()
+                # pr.save()
+                
+                ### Create Formula OrderH
+                ordH = BOOK.objects.all()
+                print(ordH)
 
                 # Get Order Details
                 ordDetail = RequestOrderDetail.objects.filter(
                     request_order_id=obj).all()
                 seq = 1
                 qty = 0
-                lst = []
                 for i in ordDetail:
                     pDetail = PurchaseRequestDetail(
                         purchase_request_id=pr,
@@ -198,10 +202,10 @@ def make_purchase_request(modeladmin, request, queryset):
                         is_sync=False,
                         created_by_id=request.user,
                     )
-                    pDetail.save()
+                    # pDetail.save()
                     # Update Status Order Details
                     i.request_status = "2"
-                    i.save()
+                    # i.save()
 
                     # Summary Seq/Qty
                     seq += 1
@@ -210,12 +214,7 @@ def make_purchase_request(modeladmin, request, queryset):
             # Update PR Qty
             pr.item = seq-1
             pr.qty = qty
-            pr.save()
-
-            # # Check Order Status
-            # obj_status = "2"  # กรณีที่ครบ
-            # if obj.ro_item != (seq - 1):
-            #     obj_status = "1"  # กรณีที่ไม่ครบ
+            # pr.save()
 
             # Update Order Status
             queryset.update(ro_status="2")
@@ -487,7 +486,7 @@ class ProductPurchaseRequestInline(admin.TabularInline):
 def make_purchase_order(modeladmin, request, queryset):
     data = queryset
     for obj in data:
-        pref = f"RO{obj.purchase_date.strftime('%Y%m%d')[3:]}"
+        pref = f"PO{obj.purchase_date.strftime('%Y%m%d')[3:]}"
         rnd = PurchaseOrder.objects.filter(order_no__gte=pref).count() + 1
         ids = f"{pref}{rnd:05d}"
         poHeader = PurchaseOrder(purchase_id=obj, order_no=ids, order_date=obj.purchase_date, item=obj.item,

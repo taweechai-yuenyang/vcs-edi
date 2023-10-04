@@ -33,6 +33,8 @@ class BOOK(models.Model):
     FCSKID = models.CharField(max_length=8, db_column="FCSKID", default=nanoid.generate(size=8), blank=True, null=True)
     FCCODE = models.CharField(max_length=30, db_column="FCCODE")
     FCNAME = models.CharField(max_length=30, db_column="FCNAME")
+    FCREFTYPE = models.CharField(max_length=30, db_column="FCREFTYPE",blank=True, null=True)
+    FCPREFIX = models.CharField(max_length=30, db_column="FCPREFIX",blank=True, null=True)
     
     class Meta:
         db_table = "BOOK"
