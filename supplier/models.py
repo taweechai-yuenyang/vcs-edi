@@ -156,6 +156,7 @@ class Product(models.Model):
     id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
     prod_type_id = models.ForeignKey(ProductType, verbose_name="Product Type ID", on_delete=models.SET_NULL, null=True)
     prod_group_id = models.ForeignKey(ProductGroup, verbose_name="Product Group ID", on_delete=models.SET_NULL, null=True)
+    unit_id = models.ForeignKey(Unit, verbose_name="Unit ID", on_delete=models.SET_NULL, null=True)
     code = models.CharField(max_length=150, verbose_name="Code", unique=True, null=False)
     name = models.CharField(max_length=250, verbose_name="Name", null=False)
     description = models.TextField(verbose_name="Description",blank=True, null=True)

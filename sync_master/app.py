@@ -338,7 +338,7 @@ def sync_product():
         obj = response.json()
         token = obj['access']
         conn = pymssql.connect(host=dbHost, user=dbUser,password=dbPassword, charset=dbCharset, database=dbName, tds_version=r'7.0')
-        SQL_QUERY = f"""select p.FCSKID,p.FCTYPE,p.FCCODE,p.FCNAME,p.FCNAME2,g.FCCODE from PROD p inner join PDGRP g on p.FCPDGRP=g.FCSKID where p.FCTYPE in ('1','5') order by p.FCCODE,p.FCNAME"""
+        SQL_QUERY = f"""select p.FCSKID,p.FCTYPE,p.FCCODE,p.FCNAME,p.FCNAME2,g.FCCODE,u.FCCODE from PROD p inner join PDGRP g on p.FCPDGRP=g.FCSKID inner join UM u on p.FCUM=u.FCSKID where p.FCTYPE in ('1','5') order by p.FCCODE,p.FCNAME"""
         # SQL_QUERY = f"""select FCSKID,FCTYPE,FCCODE,FCNAME,FCNAME2 from PROD where FCCODE in ('50104-6006', '50502-529', '5T078-63911-06-D3', 'FDL4 1843', 'W9524-56411-03', 'W95EB-0004A')"""
         cursor = conn.cursor()
         cursor.execute(SQL_QUERY)
@@ -350,10 +350,11 @@ def sync_product():
             FCNAME = str(f"{r[3]}").strip()
             FCNAME2 = str(f"{r[4]}").strip()
             FCPDGRP = str(f"{r[5]}").strip()
+            FCUM = str(f"{r[6]}").strip()
             if len(FCNAME2) == 0:
                 FCNAME2 = f"{FCCODE}-{FCNAME}"
 
-            payload = f'prod_type_id={FCTYPE}&prod_group_id={FCPDGRP}&code={FCCODE}&name={FCNAME}&description={FCNAME2}&is_active=1'.encode(
+            payload = f'prod_type_id={FCTYPE}&prod_group_id={FCPDGRP}&unit_id={FCUM}&code={FCCODE}&name={FCNAME}&description={FCNAME2}&is_active=1'.encode(
                 'utf8')
             headers = {
                 'Content-Type': 'application/x-www-form-urlencoded',

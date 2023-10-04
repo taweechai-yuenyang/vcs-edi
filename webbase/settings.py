@@ -133,7 +133,7 @@ DATABASES = {
             'driver_supports_utf8': True,
         },
     },
-    'FormulaVCST': {
+    'formula_vcst': {
         'ENGINE': 'mssql',
         'NAME': 'Formula',
         'USER': 'sa',

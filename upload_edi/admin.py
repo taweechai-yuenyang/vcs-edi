@@ -6,8 +6,9 @@ from django.db.models.query import QuerySet
 from django.http.request import HttpRequest
 from django.shortcuts import redirect
 from django.utils.html import format_html
+import nanoid
 import pandas as pd
-from formula_vcst.models import BOOK, OrderH
+from formula_vcst.models import BOOK, COOR, DEPT, PROD, SECT, UM, NoteCut, OrderH, OrderI
 
 from supplier.models import Book, OrderType, Product, ProductGroup
 from .models import EDI_REQUEST_ORDER_STATUS, PURCHASE_ORDER_STATUS, PurchaseOrder, PurchaseOrderDetail, PurchaseRequest, PurchaseRequestDetail, RequestOrder, RequestOrderDetail, UploadEDI
@@ -160,6 +161,7 @@ def make_purchase_request(modeladmin, request, queryset):
         data = queryset
         for obj in data:
             if int(obj.ro_status) < 2:
+            # if int(obj.ro_status) < 4:
                 # print(obj[0].edi_file_id)
                 dte = f'PR{obj.ro_date.strftime("%Y%m%d")[3:]}'
                 rnd = PurchaseRequest.objects.filter(
@@ -178,43 +180,107 @@ def make_purchase_request(modeladmin, request, queryset):
                     created_by_id=request.user,
                     purchase_status="0",
                 )
-                # pr.save()
+                # print(ids)
+                pr.save()
                 
-                ### Create Formula OrderH
-                ordH = BOOK.objects.all()
-                print(ordH)
-
-                # Get Order Details
-                ordDetail = RequestOrderDetail.objects.filter(
-                    request_order_id=obj).all()
-                seq = 1
-                qty = 0
-                for i in ordDetail:
-                    pDetail = PurchaseRequestDetail(
-                        purchase_request_id=pr,
-                        request_order_id=i,
-                        product_group_id=i.product_id.prod_group_id,
-                        product_id=i.product_id,
-                        seq=seq,
-                        qty=i.request_qty,
-                        remark=i.remark,
-                        is_confirm=False,
-                        is_sync=False,
-                        created_by_id=request.user,
+                # #### Create Formula OrderH
+                dept = DEPT.objects.filter(FCCODE=request.user.section_id.code).values()
+                sect = SECT.objects.filter(FCCODE=request.user.department_id.code).values()
+                ordBook = BOOK.objects.filter(FCREFTYPE="PR", FCCODE="0002").values()
+                supplier = COOR.objects.filter(FCCODE=obj.supplier_id.code).values()
+                fccode = obj.ro_date.strftime("%Y%m%d")[3:6]
+                ordRnd = OrderH.objects.filter(FCCODE__gte=fccode).count() + 1
+                fccodeNo = f"{fccode}{ordRnd:04d}"
+                prNo = f"TEST{str(ordBook[0]['FCPREFIX']).strip()}{fccodeNo}"
+                try:
+                    ordH = OrderH(
+                        FCSKID=nanoid.generate(size=8),
+                        FCREFTYPE="PR",
+                        FCDEPT=dept[0]['FCSKID'],
+                        FCSECT=sect[0]['FCSKID'],
+                        FCBOOK=ordBook[0]['FCSKID'],
+                        FCCREATEBY=request.user.id,
+                        FCAPPROVEB=request.user.id,
+                        FCCODE=fccodeNo,
+                        FCREFNO=prNo,
+                        FCCOOR=supplier[0]['FCSKID'],
+                        FDDATE=obj.ro_date,
+                        FDDUEDATE=obj.ro_date,
+                        FNAMT=obj.ro_qty,
                     )
-                    # pDetail.save()
-                    # Update Status Order Details
-                    i.request_status = "2"
-                    # i.save()
+                    ordH.save()
+                    pr.ref_formula_id=ordH.FCSKID
+                    # print(ordH.FCSKID)
+                    # Get Order Details
+                    ordDetail = RequestOrderDetail.objects.filter(
+                        request_order_id=obj).all()
+                    seq = 1
+                    qty = 0
+                    for i in ordDetail:
+                        pDetail = PurchaseRequestDetail(
+                            purchase_request_id=pr,
+                            request_order_id=i,
+                            product_group_id=i.product_id.prod_group_id,
+                            product_id=i.product_id,
+                            seq=seq,
+                            qty=i.request_qty,
+                            remark=i.remark,
+                            is_confirm=False,
+                            is_sync=False,
+                            created_by_id=request.user,
+                        )
+                        # Update Status Order Details
+                        i.request_status = "2"
+                        i.save()
+                        
+                        ### Create OrderI Formula
+                        try:
+                            ordProd = PROD.objects.filter(FCCODE=i.product_id.code,FCTYPE=i.product_id.prod_type_id.code).values()
+                            unitObj = UM.objects.filter(FCCODE=i.product_id.unit_id.code).values()
+                            ordI = OrderI(
+                                FCSKID=nanoid.generate(size=8),
+                                FCCOOR=supplier[0]['FCSKID'],
+                                FCDEPT=dept[0]['FCSKID'],
+                                FCORDERH=ordH.FCSKID,
+                                FCPROD=ordProd[0]["FCSKID"],
+                                FCPRODTYPE=ordProd[0]["FCTYPE"],
+                                FCREFTYPE="PR",
+                                FCSECT=sect[0]['FCSKID'],
+                                FCSEQ=f"{seq:03d}",
+                                FCSTUM=unitObj[0]["FCSKID"],
+                                FCUM=unitObj[0]["FCSKID"],
+                                FCUMSTD=unitObj[0]["FCSKID"],
+                                FDDATE=obj.ro_date,
+                                FNQTY=i.request_qty,
+                                FMREMARK=i.remark,
+                                FNBACKQTY=i.request_qty,
+                                FNPRICE=ordProd[0]['FNPRICE'],
+                                FNPRICEKE=ordProd[0]['FNPRICE'],
+                                FCSHOWCOMP="",
+                            )
+                            ordI.save()
+                            
+                            pDetail.ref_formula_id=ordI.FCSKID
+                            pDetail.save()
+                        except Exception as e:
+                            messages.error(request, str(e))
+                            ordH.delete()
+                            return
 
-                    # Summary Seq/Qty
-                    seq += 1
-                    qty += i.request_qty
+                        # Summary Seq/Qty
+                        seq += 1
+                        qty += i.request_qty
+                    
+                except Exception as e:
+                    messages.error(request, str(e))
+                    ordH.delete()
+                    return
+                ### End Formula
 
             # Update PR Qty
             pr.item = seq-1
             pr.qty = qty
-            # pr.save()
+            pr.save()
 
             # Update Order Status
             queryset.update(ro_status="2")
@@ -492,28 +558,130 @@ def make_purchase_order(modeladmin, request, queryset):
         poHeader = PurchaseOrder(purchase_id=obj, order_no=ids, order_date=obj.purchase_date, item=obj.item,
                                  qty=obj.qty, order_status="0", description=obj.description, created_by_id=request.user)
         poHeader.save()
-        prDetail = PurchaseRequestDetail.objects.filter(
-            purchase_request_id=obj).all()
-        for pr in prDetail:
-            poDetail = PurchaseOrderDetail(
-                purchase_order_id=poHeader,
-                product_group_id=pr.product_group_id,
-                product_id=pr.product_id,
-                seq=pr.seq,
-                qty=pr.qty,
-                remark=pr.remark,
-                is_active=True,
-                created_by_id=request.user
+        
+        #### Create Order Header
+        dept = DEPT.objects.filter(FCCODE=request.user.section_id.code).values()
+        sect = SECT.objects.filter(FCCODE=request.user.department_id.code).values()
+        ordBook = BOOK.objects.filter(FCREFTYPE="PO", FCCODE="002").values()
+        supplier = COOR.objects.filter(FCCODE=obj.supplier_id.code).values()
+        fccode = obj.purchase_date.strftime("%Y%m%d")[3:6]
+        ordRnd = OrderH.objects.filter(FCCODE__gte=fccode).count() + 1
+        fccodeNo = f"{fccode}{ordRnd:04d}"
+        prNo = f"TEST{str(ordBook[0]['FCPREFIX']).strip()}{fccodeNo}"
+        
+        try:
+            ordH = OrderH(
+                FCSKID=nanoid.generate(size=8),
+                FCREFTYPE="PO",
+                FCDEPT=dept[0]['FCSKID'],
+                FCSECT=sect[0]['FCSKID'],
+                FCBOOK=ordBook[0]['FCSKID'],
+                FCCREATEBY=request.user.id,
+                FCAPPROVEB=request.user.id,
+                FCCODE=fccodeNo,
+                FCREFNO=prNo,
+                FCCOOR=supplier[0]['FCSKID'],
+                FDDATE=obj.purchase_date,
+                FDDUEDATE=obj.purchase_date,
+                FNAMT=obj.qty,
             )
-            poDetail.save()
+            ordH.save()
+            # print(ordH.FCSKID)
+            prDetail = PurchaseRequestDetail.objects.filter(purchase_request_id=obj).all()
+            for pr in prDetail:
+                poDetail = PurchaseOrderDetail(
+                    purchase_order_id=poHeader,
+                    product_group_id=pr.product_group_id,
+                    product_id=pr.product_id,
+                    seq=pr.seq,
+                    qty=pr.qty,
+                    remark=pr.remark,
+                    is_active=True,
+                    created_by_id=request.user
+                )
+                
+                
+                ### Create OrderI Formula
+                try:
+                    ordProd = PROD.objects.filter(FCCODE=pr.product_id.code,FCTYPE=pr.product_id.prod_type_id.code).values()
+                    unitObj = UM.objects.filter(FCCODE=pr.product_id.unit_id.code).values()
+                    ordI = OrderI(
+                        FCSKID=nanoid.generate(size=8),
+                        FCCOOR=supplier[0]['FCSKID'],
+                        FCDEPT=dept[0]['FCSKID'],
+                        FCORDERH=ordH.FCSKID,
+                        FCPROD=ordProd[0]["FCSKID"],
+                        FCPRODTYPE=ordProd[0]["FCTYPE"],
+                        FCREFTYPE="PO",
+                        FCSECT=sect[0]['FCSKID'],
+                        FCSEQ=f"{pr.seq:03d}",
+                        FCSTUM=unitObj[0]["FCSKID"],
+                        FCUM=unitObj[0]["FCSKID"],
+                        FCUMSTD=unitObj[0]["FCSKID"],
+                        FDDATE=obj.purchase_date,
+                        FNQTY=pr.qty,
+                        FMREMARK=pr.remark,
+                        FNBACKQTY=pr.qty,
+                        FNPRICE=ordProd[0]['FNPRICE'],
+                        FNPRICEKE=ordProd[0]['FNPRICE'],
+                        FCSHOWCOMP="",
+                    )
+                    
+                    ordI.save()
+                    poDetail.ref_formula_id=ordI.FCSKID
+                    poDetail.save()
+                    
+                    ### Create Notecut
+                    orderPRID = obj.ref_formula_id
+                    orderPRDetailID = pr.ref_formula_id
+                    
+                    
+                    orderPOID = ordH.FCSKID
+                    orderPODetailID = ordI.FCSKID
+                    
+                    print(f"H: {orderPRID} HD: {orderPRDetailID} ==> P: {orderPOID} PD: {orderPODetailID}")
+                    noteCut = NoteCut(
+                        FCAPPNAME="",
+                        FCSKID=nanoid.generate(size=8),
+                        FCCHILDH=orderPRID,
+                        FCCHILDI=orderPRDetailID,
+                        FCMASTERH=orderPOID,
+                        FCMASTERI=orderPODetailID,
+                        FNQTY=pr.qty,
+                        FNUMQTY=pr.qty,
+                        FCCORRECTB="",
+                        FCCREATEBY="",
+                        FCCREATETY="",
+                        FCCUACC="",
+                        FCDATAIMP="",
+                        FCORGCODE="",
+                        FCSELTAG="",
+                        FCSRCUPD="",
+                        FCU1ACC="",
+                        FCUDATE="",
+                        FCUTIME="",
+                    )
+                    noteCut.save()
+                    
+                except Exception as e:
+                    messages.error(request, str(e))
+                    ordH.delete()
+                    poHeader.delete()
+                    return
 
-            # Update Purchase Request
-            pr.is_confirm = True
-            pr.save()
-
-    queryset.update(purchase_status="2")
-    messages.success(
-        request, f'เพิ่มข้อมูล PO เอกสารเลขที่ {poHeader} เรียบร้อยแล้ว')
+                # Update Purchase Request
+                pr.is_confirm = True
+                pr.save()
+                
+            poHeader.ref_formula_id=ordH.FCSKID
+            poHeader.save()
+            queryset.update(purchase_status="2")
+            messages.success(request, f'เพิ่มข้อมูล PO เอกสารเลขที่ {poHeader} เรียบร้อยแล้ว')
+            
+        except Exception as e:
+            messages.error(request, str(e))
+            ordH.delete()
+            pass
 
 
 class PurchaseRequestAdmin(AdminConfirmMixin, admin.ModelAdmin):

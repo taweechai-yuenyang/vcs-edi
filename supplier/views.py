@@ -365,9 +365,11 @@ class ProductListApiView(APIView):
         '''
         pGrp = ProductGroup.objects.get(code=request.data.get('prod_group_id'))
         pType = ProductType.objects.get(code=request.data.get('prod_type_id'))
+        pUnit = Unit.objects.get(code=request.data.get('unit_id'))
         obj = request.POST.copy()
         obj['prod_type_id'] = pType.id
         obj['prod_group_id'] = pGrp.id
+        obj['unit_id'] = pUnit.id
         
         serializer = ProductSerializer(data=obj)
         if serializer.is_valid():
