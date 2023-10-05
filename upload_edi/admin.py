@@ -191,7 +191,7 @@ def make_purchase_request(modeladmin, request, queryset):
                 fccode = obj.ro_date.strftime("%Y%m%d")[3:6]
                 ordRnd = OrderH.objects.filter(FCCODE__gte=fccode).count() + 1
                 fccodeNo = f"{fccode}{ordRnd:04d}"
-                prNo = f"TEST{str(ordBook[0]['FCPREFIX']).strip()}{fccodeNo}"
+                prNo = f"TEST{str(ordBook[0]['FCPREFIX']).strip()}{fccodeNo}"### PR TEST REFNO
                 try:
                     ordH = OrderH(
                         FCSKID=nanoid.generate(size=8),
@@ -470,58 +470,125 @@ class RequestOrderAdmin(AdminConfirmMixin, admin.ModelAdmin):
                     purchase_status="0",
                 )
                 pr.save()
+                
+                # #### Create Formula OrderH
+                dept = DEPT.objects.filter(FCCODE=request.user.section_id.code).values()
+                sect = SECT.objects.filter(FCCODE=request.user.department_id.code).values()
+                ordBook = BOOK.objects.filter(FCREFTYPE="PR", FCCODE="0002").values()
+                supplier = COOR.objects.filter(FCCODE=obj.supplier_id.code).values()
+                fccode = obj.ro_date.strftime("%Y%m%d")[3:6]
+                ordRnd = OrderH.objects.filter(FCCODE__gte=fccode).count() + 1
+                fccodeNo = f"{fccode}{ordRnd:04d}"
+                prNo = f"TEST{str(ordBook[0]['FCPREFIX']).strip()}{fccodeNo}"### PR TEST REFNO
+                
+                try:
+                    ordH = OrderH(
+                        FCSKID=nanoid.generate(size=8),
+                        FCREFTYPE="PR",
+                        FCDEPT=dept[0]['FCSKID'],
+                        FCSECT=sect[0]['FCSKID'],
+                        FCBOOK=ordBook[0]['FCSKID'],
+                        FCCREATEBY=request.user.id,
+                        FCAPPROVEB=request.user.id,
+                        FCCODE=fccodeNo,
+                        FCREFNO=prNo,
+                        FCCOOR=supplier[0]['FCSKID'],
+                        FDDATE=obj.ro_date,
+                        FDDUEDATE=obj.ro_date,
+                        FNAMT=obj.ro_qty,
+                    )
+                    ordH.save()
+                    pr.ref_formula_id=ordH.FCSKID
+                    
+                    # Get Order Details
+                    ordDetail = RequestOrderDetail.objects.filter(
+                        request_order_id=obj).all()
+                    seq = 1
+                    qty = 0
+                    balance_qty = 0
+                    for i in ordDetail:
+                        if i.is_selected and i.request_status == "0":
+                            pDetail = PurchaseRequestDetail(
+                                purchase_request_id=pr,
+                                request_order_id=i,
+                                product_group_id=i.product_id.prod_group_id,
+                                product_id=i.product_id,
+                                seq=seq,
+                                qty=i.request_qty,
+                                remark=i.remark,
+                                is_confirm=False,
+                                is_sync=False,
+                                created_by_id=request.user,
+                            )
+                            pDetail.save()
+                            # Update Status Order Details
+                            i.request_status = "2"
+                            i.save()
+                            
+                            ### Create OrderI Formula
+                            try:
+                                ordProd = PROD.objects.filter(FCCODE=i.product_id.code,FCTYPE=i.product_id.prod_type_id.code).values()
+                                unitObj = UM.objects.filter(FCCODE=i.product_id.unit_id.code).values()
+                                ordI = OrderI(
+                                    FCSKID=nanoid.generate(size=8),
+                                    FCCOOR=supplier[0]['FCSKID'],
+                                    FCDEPT=dept[0]['FCSKID'],
+                                    FCORDERH=ordH.FCSKID,
+                                    FCPROD=ordProd[0]["FCSKID"],
+                                    FCPRODTYPE=ordProd[0]["FCTYPE"],
+                                    FCREFTYPE="PR",
+                                    FCSECT=sect[0]['FCSKID'],
+                                    FCSEQ=f"{seq:03d}",
+                                    FCSTUM=unitObj[0]["FCSKID"],
+                                    FCUM=unitObj[0]["FCSKID"],
+                                    FCUMSTD=unitObj[0]["FCSKID"],
+                                    FDDATE=obj.ro_date,
+                                    FNQTY=i.request_qty,
+                                    FMREMARK=i.remark,
+                                    FNBACKQTY=i.request_qty,
+                                    FNPRICE=ordProd[0]['FNPRICE'],
+                                    FNPRICEKE=ordProd[0]['FNPRICE'],
+                                    FCSHOWCOMP="",
+                                )
+                                ordI.save()
+                                
+                                pDetail.ref_formula_id=ordI.FCSKID
+                                pDetail.save()
+                            except Exception as e:
+                                messages.error(request, str(e))
+                                ordH.delete()
+                                return
 
-                # Get Order Details
-                ordDetail = RequestOrderDetail.objects.filter(
-                    request_order_id=obj).all()
-                seq = 1
-                qty = 0
-                balance_qty = 0
-                for i in ordDetail:
-                    if i.is_selected and i.request_status == "0":
-                        pDetail = PurchaseRequestDetail(
-                            purchase_request_id=pr,
-                            request_order_id=i,
-                            product_group_id=i.product_id.prod_group_id,
-                            product_id=i.product_id,
-                            seq=seq,
-                            qty=i.request_qty,
-                            remark=i.remark,
-                            is_confirm=False,
-                            is_sync=False,
-                            created_by_id=request.user,
-                        )
-                        pDetail.save()
-                        # Update Status Order Details
-                        i.request_status = "2"
-                        i.save()
+                            # Summary Seq/Qty
+                            seq += 1
+                            qty += i.request_qty
+                        else:
+                            balance_qty += i.request_qty
 
-                        # Summary Seq/Qty
-                        seq += 1
-                        qty += i.request_qty
-                    else:
-                        balance_qty += i.request_qty
+                    # Update PR Qty
+                    pr.item = seq-1
+                    pr.qty = qty
+                    pr.save()
 
-                # Update PR Qty
-                pr.item = seq-1
-                pr.qty = qty
-                pr.save()
+                    # Check Order Status
+                    obj_status = "2"  # กรณีที่ครบ
+                    if obj.ro_item != pr.item:
+                        obj_status = "1"  # กรณีที่ไม่ครบ
+                    # Update Order Status
+                    obj.ro_status = obj_status
 
-                # Check Order Status
-                obj_status = "2"  # กรณีที่ครบ
-                if obj.ro_item != pr.item:
-                    obj_status = "1"  # กรณีที่ไม่ครบ
-                # Update Order Status
-                obj.ro_status = obj_status
+                    obj.ro_item -= pr.item
+                    obj.qty = balance_qty
+                    obj.save()
+                    messages.success(
+                        request, f'เพิ่มข้อมูล PR เอกสารเลขที่ {pr} เรียบร้อยแล้ว')
 
-                obj.ro_item -= pr.item
-                obj.qty = balance_qty
-                obj.save()
-                messages.success(
-                    request, f'เพิ่มข้อมูล PR เอกสารเลขที่ {pr} เรียบร้อยแล้ว')
-
-                # SendNotifiedMessage
-
+                    # SendNotifiedMessage
+                
+                except Exception as e:
+                    print(e)
+                    messages.error(request, f"Error: {e}")
+                    # return HttpResponseRedirect(reverse('admin:request_order_change', args=(obj.id,)))
         return super().response_change(request, object)
 
     pass
@@ -639,7 +706,7 @@ def make_purchase_order(modeladmin, request, queryset):
                     orderPOID = ordH.FCSKID
                     orderPODetailID = ordI.FCSKID
                     
-                    print(f"H: {orderPRID} HD: {orderPRDetailID} ==> P: {orderPOID} PD: {orderPODetailID}")
+                    # print(f"H: {orderPRID} HD: {orderPRDetailID} ==> P: {orderPOID} PD: {orderPODetailID}")
                     noteCut = NoteCut(
                         FCAPPNAME="",
                         FCSKID=nanoid.generate(size=8),

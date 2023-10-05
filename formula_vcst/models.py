@@ -90,6 +90,19 @@ class PROD(models.Model):
         db_table = "PROD"
         app_label = "formula_vcst"
         
+
+class EMPLOYEE(models.Model):
+    FCSKID = models.CharField(max_length=8, db_column="FCSKID",primary_key=True, editable=False)
+    FCCODE = models.CharField(max_length=30, db_column="FCCODE")
+    FCNAME = models.CharField(max_length=30, db_column="FCNAME")
+    
+    def __str__(self):
+        return self.FCCODE
+    
+    class Meta:
+        db_table = "EMPL"
+        app_label = "formula_vcst"
+        
 class OrderH(models.Model):
     FCDATASER = models.CharField(max_length=4, db_column="FCDATASER", default="$$$9",blank=True, null=True,)
     FCSKID = models.CharField(max_length=8, db_column="FCSKID",primary_key=True, editable=False, default=nanoid.generate(size=8))

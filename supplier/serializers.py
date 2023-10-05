@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Book, Department, Position, ProductGroup, Section, Supplier, OrderType, ProductType, Product, Unit
+from .models import Book, Department, Employee, Position, ProductGroup, Section, Supplier, OrderType, ProductType, Product, Unit
 
 
 class SupplierSerializer(serializers.ModelSerializer):
@@ -40,6 +40,11 @@ class PositionSerializer(serializers.ModelSerializer):
 class DepartmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Department
+        fields = ('id','code','name','description','is_active','created_on','updated_on',)
+        
+class EmployeeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Employee
         fields = ('id','code','name','description','is_active','created_on','updated_on',)
         
 class BookSerializer(serializers.ModelSerializer):

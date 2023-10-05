@@ -131,6 +131,45 @@ def sync_um():
         print(f"============== Unit Type =============")
         print(err)
         print(f"======================================")
+        
+def sync_employee():
+    response = requests.request("POST", f"{urlAPI}/api/token/", headers=objHeader, data=userLogIn)
+    if response.status_code == 200:
+        obj = response.json()
+        token = obj['access']
+        conn = pymssql.connect(host=dbHost, user=dbUser,password=dbPassword, charset=dbCharset, database=dbName, tds_version=r'7.0')
+        SQL_QUERY = f"""select FCCODE,FCNAME,FCNAME2 from EMPL"""
+        cursor = conn.cursor()
+        cursor.execute(SQL_QUERY)
+        err = []
+        i = 1
+        for r in cursor.fetchall():
+            FCCODE = str(f"{r[0]}").strip()
+            FCNAME = str(f"{r[1]}").strip()
+            FCNAME2 = str(f"{r[2]}").strip()
+
+            payload = f'code={FCCODE}&name={FCNAME}&description={FCNAME2}&is_active=1'.encode(
+                'utf8')
+            headers = {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': f'Bearer {token}'}
+
+            response = requests.request(
+                "POST", f"{urlAPI}/api/employee", headers=headers, data=payload)
+
+            # print(response.text)
+            if response.status_code != 201:
+                err.append(FCCODE)
+
+            print(f"{i}.Sync Status Code:{response.status_code} DataID: {FCCODE}")
+            i += 1
+            # time.sleep(0.1)
+            
+        cursor.close()
+        conn.close()
+        print(f"============== Employee =============")
+        print(err)
+        print(f"=======================================")
 
 
 def sync_order_type():
@@ -387,6 +426,7 @@ def sync_product():
 
 if __name__ == "__main__":
     sync_supplier()
+    sync_employee()
     sync_product_type()
     sync_um()
     sync_order_type()

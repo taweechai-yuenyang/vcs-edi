@@ -2,6 +2,8 @@ import uuid
 from django.db import models
 from django.contrib.auth.models import User, AbstractUser
 
+from formula_vcst.models import EMPLOYEE
+
 # Create your models here.
 class OrderType(models.Model):
     # select p.FCSKID,p.FCCODE,p.FCNAME,p.FCNAME2 from PRODTYPE p
@@ -38,6 +40,24 @@ class ProductType(models.Model):
         db_table = "tbmProductType"
         verbose_name = "Product Type"
         verbose_name_plural = "Product Type"
+        
+class Corporation(models.Model):
+    # select p.FCCODE,p.FCNAME,p.FCNAME2 from PRODTYPE p
+    id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
+    code = models.CharField(max_length=50, verbose_name="Code", unique=True, blank=False, null=False)
+    name = models.CharField(max_length=250, verbose_name="Name", blank=False, null=False)
+    description = models.TextField(verbose_name="Description",blank=True, null=True)
+    is_active = models.BooleanField(verbose_name="Is Active", default=True)
+    created_on = models.DateTimeField(auto_now_add=True)
+    updated_on = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        db_table = "tbmCorporation"
+        verbose_name = "Corporation"
+        verbose_name_plural = "Corporation"
         
 class ProductGroup(models.Model):
     # select FCSKID,FCCODE,FCNAME,FCNAME2 from PDGRP
@@ -129,6 +149,24 @@ class Department(models.Model):
         verbose_name = "Department"
         verbose_name_plural = "Department"
         
+class Employee(models.Model):
+    id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
+    corporation_id = models.ForeignKey(Corporation, blank=True, null=True, on_delete=models.SET_NULL)
+    code = models.CharField(max_length=50, verbose_name="Code", unique=True,blank=False, null=False)
+    name = models.CharField(max_length=250, verbose_name="Name", blank=False, null=False)
+    description = models.TextField(verbose_name="Description",blank=True, null=True)
+    is_active = models.BooleanField(verbose_name="Is Active", default=True)
+    created_on = models.DateTimeField(auto_now_add=True)
+    updated_on = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.code}-{self.name}"
+    
+    class Meta:
+        db_table = "tbmFormulaEmployee"
+        verbose_name = "Formula Employee"
+        verbose_name_plural = "Formula Employee"
+        
         
 class Book(models.Model):
     # select FCSKID,FCREFTYPE,FCCODE,FCNAME,FCNAME2,FCPREFIX from BOOK
@@ -174,7 +212,7 @@ class Product(models.Model):
         verbose_name_plural = "Product"
         
 class ManagementUser(AbstractUser):
-    formula_user_id = models.CharField(max_length=8, verbose_name="Formula User ID", blank=True, null=True)
+    formula_user_id = models.ForeignKey(Employee, verbose_name="Formula User ID", blank=True, null=True, on_delete=models.SET_NULL)
     department_id = models.ForeignKey(Department, blank=True, verbose_name="Department ID",null=True, on_delete=models.SET_NULL)
     position_id = models.ForeignKey(Position, blank=True, verbose_name="Position ID",null=True, on_delete=models.SET_NULL)
     section_id = models.ForeignKey(Section, blank=True, verbose_name="Section ID",null=True, on_delete=models.SET_NULL)

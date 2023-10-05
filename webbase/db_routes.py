@@ -15,6 +15,7 @@ class DBRouter:
         "ORDERH",
         "ORDERI",
         "NOTECUT",
+        "EMPL",
     ]
     
     app_disabled = ["formula_vcst"]

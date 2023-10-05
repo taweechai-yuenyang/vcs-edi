@@ -14,4 +14,5 @@ urlpatterns = [
     path("position", views.PositionListApiView.as_view()),
     path("department", views.DepartmentListApiView.as_view()),
     path("book", views.BookListApiView.as_view()),
+    path("employee", views.EmployeeListApiView.as_view()),
 ]
