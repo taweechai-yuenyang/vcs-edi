@@ -8,7 +8,7 @@ from django.shortcuts import redirect
 from django.utils.html import format_html
 import nanoid
 import pandas as pd
-from formula_vcst.models import BOOK, COOR, DEPT, PROD, SECT, UM, NoteCut, OrderH, OrderI
+from formula_vcst.models import BOOK, COOR, DEPT, EMPLOYEE, PROD, SECT, UM, NoteCut, OrderH, OrderI
 
 from supplier.models import Book, OrderType, Product, ProductGroup
 from .models import EDI_REQUEST_ORDER_STATUS, PURCHASE_ORDER_STATUS, PurchaseOrder, PurchaseOrderDetail, PurchaseRequest, PurchaseRequestDetail, RequestOrder, RequestOrderDetail, UploadEDI
@@ -184,6 +184,7 @@ def make_purchase_request(modeladmin, request, queryset):
                 pr.save()
                 
                 # #### Create Formula OrderH
+                emp = EMPLOYEE.objects.filter(FCCODE=request.user.formula_user_id.code).values()
                 dept = DEPT.objects.filter(FCCODE=request.user.section_id.code).values()
                 sect = SECT.objects.filter(FCCODE=request.user.department_id.code).values()
                 ordBook = BOOK.objects.filter(FCREFTYPE="PR", FCCODE="0002").values()
@@ -199,8 +200,8 @@ def make_purchase_request(modeladmin, request, queryset):
                         FCDEPT=dept[0]['FCSKID'],
                         FCSECT=sect[0]['FCSKID'],
                         FCBOOK=ordBook[0]['FCSKID'],
-                        FCCREATEBY=request.user.id,
-                        FCAPPROVEB=request.user.id,
+                        FCCREATEBY=emp[0]['FCSKID'],
+                        FCAPPROVEB=emp[0]['FCSKID'],
                         FCCODE=fccodeNo,
                         FCREFNO=prNo,
                         FCCOOR=supplier[0]['FCSKID'],
@@ -472,6 +473,7 @@ class RequestOrderAdmin(AdminConfirmMixin, admin.ModelAdmin):
                 pr.save()
                 
                 # #### Create Formula OrderH
+                emp = EMPLOYEE.objects.filter(FCCODE=request.user.formula_user_id.code).values()
                 dept = DEPT.objects.filter(FCCODE=request.user.section_id.code).values()
                 sect = SECT.objects.filter(FCCODE=request.user.department_id.code).values()
                 ordBook = BOOK.objects.filter(FCREFTYPE="PR", FCCODE="0002").values()
@@ -488,8 +490,8 @@ class RequestOrderAdmin(AdminConfirmMixin, admin.ModelAdmin):
                         FCDEPT=dept[0]['FCSKID'],
                         FCSECT=sect[0]['FCSKID'],
                         FCBOOK=ordBook[0]['FCSKID'],
-                        FCCREATEBY=request.user.id,
-                        FCAPPROVEB=request.user.id,
+                        FCCREATEBY=emp[0]['FCSKID'],
+                        FCAPPROVEB=emp[0]['FCSKID'],
                         FCCODE=fccodeNo,
                         FCREFNO=prNo,
                         FCCOOR=supplier[0]['FCSKID'],
@@ -627,6 +629,7 @@ def make_purchase_order(modeladmin, request, queryset):
         poHeader.save()
         
         #### Create Order Header
+        emp = EMPLOYEE.objects.filter(FCCODE=request.user.formula_user_id.code).values()
         dept = DEPT.objects.filter(FCCODE=request.user.section_id.code).values()
         sect = SECT.objects.filter(FCCODE=request.user.department_id.code).values()
         ordBook = BOOK.objects.filter(FCREFTYPE="PO", FCCODE="002").values()
@@ -643,8 +646,8 @@ def make_purchase_order(modeladmin, request, queryset):
                 FCDEPT=dept[0]['FCSKID'],
                 FCSECT=sect[0]['FCSKID'],
                 FCBOOK=ordBook[0]['FCSKID'],
-                FCCREATEBY=request.user.id,
-                FCAPPROVEB=request.user.id,
+                FCCREATEBY=emp[0]["FCSKID"],
+                FCAPPROVEB=emp[0]["FCSKID"],
                 FCCODE=fccodeNo,
                 FCREFNO=prNo,
                 FCCOOR=supplier[0]['FCSKID'],
@@ -716,8 +719,8 @@ def make_purchase_order(modeladmin, request, queryset):
                         FCMASTERI=orderPODetailID,
                         FNQTY=pr.qty,
                         FNUMQTY=pr.qty,
-                        FCCORRECTB="",
-                        FCCREATEBY="",
+                        FCCORRECTB=emp[0]["FCSKID"],
+                        FCCREATEBY=emp[0]["FCSKID"],
                         FCCREATETY="",
                         FCCUACC="",
                         FCDATAIMP="",
