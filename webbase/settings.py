@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 import datetime
-import os
 from pathlib import Path
 from import_export.formats.base_formats import XLSX
 IMPORT_EXPORT_FORMATS = [XLSX]
@@ -103,36 +102,36 @@ WSGI_APPLICATION = "webbase.wsgi.application"
 # }
 
 DATABASES = {
-    # 'default': {
-    #     'ENGINE': 'mssql',
-    #     'NAME': 'EDI',
-    #     'USER': 'fm1234',
-    #     'PASSWORD': 'x2y2',
-    #     'HOST': '192.168.20.9',
-    #     'PORT': '1433',
-    #     'OPTIONS': {
-    #         'driver': 'FreeTDS',
-    #         'unicode_results': True,
-    #         'host_is_server': True,
-    #         'driver_supports_utf8': True,
-    #         'extra_params': 'tds_version=7.4',
-    #     }
-    # },
     'default': {
         'ENGINE': 'mssql',
         'NAME': 'EDI',
-        'USER': 'sa',
-        'PASSWORD': 'ADSads123',
-        'HOST': 'localhost',
+        'USER': 'fm1234',
+        'PASSWORD': 'x2y2',
+        'HOST': '192.168.20.9',
         'PORT': '1433',
-        "Trusted_Connection": "no",
-        "OPTIONS": {
-            "driver": "ODBC Driver 17 for SQL Server",
+        'OPTIONS': {
+            'driver': 'FreeTDS',
             'unicode_results': True,
             'host_is_server': True,
             'driver_supports_utf8': True,
-        },
+            'extra_params': 'tds_version=7.4',
+        }
     },
+    # 'default': {
+    #     'ENGINE': 'mssql',
+    #     'NAME': 'EDI',
+    #     'USER': 'sa',
+    #     'PASSWORD': 'ADSads123',
+    #     'HOST': 'localhost',
+    #     'PORT': '1433',
+    #     "Trusted_Connection": "no",
+    #     "OPTIONS": {
+    #         "driver": "ODBC Driver 17 for SQL Server",
+    #         'unicode_results': True,
+    #         'host_is_server': True,
+    #         'driver_supports_utf8': True,
+    #     },
+    # },
     'formula_vcst': {
         'ENGINE': 'mssql',
         'NAME': 'Formula',
