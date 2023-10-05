@@ -222,17 +222,19 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
+# TIME_ZONE = "Asia/Bangkok"
 TIME_ZONE = "Asia/Bangkok"
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = [BASE_DIR / "statics/"]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -458,3 +460,17 @@ JAZZMIN_UI_TWEAKS = {
 }
 
 USE_THOUSAND_SEPARATOR = True
+
+### Set Datetime Format
+SHORT_DATE_FORMAT = "Y-m-d"
+SHORT_DATETIME_FORMAT = "Y-m-d H:M:S"
+
+### Set File Storage
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
