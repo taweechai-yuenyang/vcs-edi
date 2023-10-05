@@ -304,4 +304,4 @@ pyrightconfig.json
 
 .vscode
 upload_edi/static/edi/**/*.xlsx
-statics/*
+static/*
