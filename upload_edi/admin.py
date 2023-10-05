@@ -31,8 +31,7 @@ class UploadEDIAdmin(admin.ModelAdmin):
 
     list_filter = ['is_generated', 'document_no', 'edi_filename', 'upload_seq']
 
-    list_display = ('document_no', 'upload_seq', 'edi_filename', 'uploaded_at',
-                    'upload_by_id', 'is_generated', 'created_on', 'updated_on','link_edi_file')
+    list_display = ('document_no', 'upload_seq', 'link_edi_file', 'uploaded_at','upload_by_id', 'is_generated', 'created_on', 'updated_on')
     fieldsets = (
         (
             None, {
@@ -45,7 +44,7 @@ class UploadEDIAdmin(admin.ModelAdmin):
     )
     
     def link_edi_file(self, obj):
-        return format_html(f'<a href="{obj.edi_file.url}" target="_blank">{obj.edi_file.name}</a>')
+        return format_html(f'<a href="{obj.edi_file.url}" target="_blank">{obj.edi_filename}</a>')
 
     # Set Overrides Message
     def message_user(self, request, message, level=messages.INFO, extra_tags='', fail_silently=False):
