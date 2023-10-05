@@ -5,7 +5,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group
 from django.forms import ModelForm
 
-from .models import (Book, Department, ManagementUser, OrderType, Product,
+from .models import (Book, Department, Employee, ManagementUser, OrderType, Product,
                      ProductGroup, ProductType, Section, Position, Supplier, Unit)
 
 # # Register your models here.
@@ -380,6 +380,14 @@ class ManagementUserAdmin(UserAdmin):
     )
     
     def save_model(self, request, obj, form, change):
+        # if obj.position_id is None:
+        #     pos = Position.objects.get(code="-")
+        #     obj.position_id = pos
+        
+        if obj.formula_user_id is None:
+            pos = Employee.objects.get(code="TEST")
+            obj.formula_user_id = pos
+            
         if obj.department_id is None:
             dp = Department.objects.get(code="-")
             obj.department_id = dp
