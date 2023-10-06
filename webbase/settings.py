@@ -102,36 +102,36 @@ WSGI_APPLICATION = "webbase.wsgi.application"
 # }
 
 DATABASES = {
-    # 'default': {
-    #     'ENGINE': 'mssql',
-    #     'NAME': 'EDI',
-    #     'USER': 'fm1234',
-    #     'PASSWORD': 'x2y2',
-    #     'HOST': '192.168.20.9',
-    #     'PORT': '1433',
-    #     'OPTIONS': {
-    #         'driver': 'FreeTDS',
-    #         'unicode_results': True,
-    #         'host_is_server': True,
-    #         'driver_supports_utf8': True,
-    #         'extra_params': 'tds_version=7.4',
-    #     }
-    # },
     'default': {
         'ENGINE': 'mssql',
         'NAME': 'EDI',
-        'USER': 'sa',
-        'PASSWORD': 'ADSads123',
-        'HOST': 'localhost',
+        'USER': 'fm1234',
+        'PASSWORD': 'x2y2',
+        'HOST': '192.168.20.9',
         'PORT': '1433',
-        "Trusted_Connection": "no",
-        "OPTIONS": {
-            "driver": "ODBC Driver 17 for SQL Server",
+        'OPTIONS': {
+            'driver': 'FreeTDS',
             'unicode_results': True,
             'host_is_server': True,
             'driver_supports_utf8': True,
-        },
+            'extra_params': 'tds_version=7.4',
+        }
     },
+    # 'default': {
+    #     'ENGINE': 'mssql',
+    #     'NAME': 'EDI',
+    #     'USER': 'sa',
+    #     'PASSWORD': 'ADSads123',
+    #     'HOST': 'localhost',
+    #     'PORT': '1433',
+    #     "Trusted_Connection": "no",
+    #     "OPTIONS": {
+    #         "driver": "ODBC Driver 17 for SQL Server",
+    #         'unicode_results': True,
+    #         'host_is_server': True,
+    #         'driver_supports_utf8': True,
+    #     },
+    # },
     'formula_vcst': {
         'ENGINE': 'mssql',
         'NAME': 'Formula',
@@ -355,7 +355,7 @@ JAZZMIN_SETTINGS = {
     "hide_models": [],
 
     # List of apps (and/or models) to base side menu ordering off of (does not need to contain all apps/models)
-    "order_with_respect_to": ["auth", "supplier", "supplier.Supplier", "supplier.OrderType",],
+    "order_with_respect_to": ["auth", "supplier", "supplier.Supplier", "supplier.RefType",],
 
     # Custom links to append to app groups, keyed on app name
     "custom_links": {
@@ -376,7 +376,7 @@ JAZZMIN_SETTINGS = {
         "supplier.Supplier": "fas fa-users",
         "supplier.ProductType": "fas fa-table",
         "supplier.Unit": "fas fa-tags",
-        "supplier.OrderType": "fas fa-layer-group",
+        "supplier.RefType": "fas fa-layer-group",
         "supplier.Product": "fas fa-database",
         "supplier.ProductGroup": "fas fa-tags",
         "supplier.Position": "fas fa-key",

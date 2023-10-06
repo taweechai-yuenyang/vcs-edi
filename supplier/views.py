@@ -1,8 +1,8 @@
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import Book, Department, Employee, Position, ProductGroup, Section, Supplier, OrderType, Product, ProductType, Unit
-from .serializers import BookSerializer, DepartmentSerializer, EmployeeSerializer, PositionSerializer, ProductGroupSerializer, SectionSerializer, SupplierSerializer,OrderTypeSerializer,ProductTypeSerializer,UnitSerializer,ProductSerializer
+from .models import Book, Corporation, Department, Employee, Factory, Position, ProductGroup, Section, Supplier, RefType, Product, ProductType, Unit
+from .serializers import BookSerializer, CorporationSerializer, DepartmentSerializer, EmployeeSerializer, FactorySerializer, PositionSerializer, ProductGroupSerializer, SectionSerializer, SupplierSerializer,RefTypeSerializer,ProductTypeSerializer,UnitSerializer,ProductSerializer
 
 
 class SupplierListApiView(APIView):
@@ -78,7 +78,7 @@ class SupplierListApiView(APIView):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
 
-class OrderTypeListApiView(APIView):
+class RefTypeListApiView(APIView):
     # add permission to check if user is authenticated
     permission_classes = [permissions.IsAuthenticated]
 
@@ -90,11 +90,11 @@ class OrderTypeListApiView(APIView):
         # Supplier = Supplier.objects.filter(user = request.user.id)
         id = self.request.query_params.get('id')
         if id:
-            obj = OrderType.objects.get(id=id)
-            serializer = OrderTypeSerializer(obj)
+            obj = RefType.objects.get(id=id)
+            serializer = RefTypeSerializer(obj)
             return Response(serializer.data, status=status.HTTP_200_OK)
         
-        obj = OrderType.objects.all()
+        obj = RefType.objects.all()
         serializer = SupplierSerializer(obj, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -103,7 +103,7 @@ class OrderTypeListApiView(APIView):
         '''
         Create the Todo with given todo data
         '''
-        serializer = OrderTypeSerializer(data=request.data)
+        serializer = RefTypeSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -175,6 +175,71 @@ class ProductGroupListApiView(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+    
+class FactoryListApiView(APIView):
+    # add permission to check if user is authenticated
+    permission_classes = [permissions.IsAuthenticated]
+
+    # 1. List all
+    def get(self, request, *args, **kwargs):
+        '''
+        List all the todo items for given requested user
+        '''
+        # Supplier = Supplier.objects.filter(user = request.user.id)
+        id = self.request.query_params.get('id')
+        if id:
+            obj = Factory.objects.get(id=id)
+            serializer = FactorySerializer(obj)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        obj = Factory.objects.all()
+        serializer = FactorySerializer(obj, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    # 2. Create
+    def post(self, request, *args, **kwargs):
+        '''
+        Create the Todo with given todo data
+        '''
+        serializer = FactorySerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class CorporationListApiView(APIView):
+    # add permission to check if user is authenticated
+    permission_classes = [permissions.IsAuthenticated]
+
+    # 1. List all
+    def get(self, request, *args, **kwargs):
+        '''
+        List all the todo items for given requested user
+        '''
+        # Supplier = Supplier.objects.filter(user = request.user.id)
+        id = self.request.query_params.get('id')
+        if id:
+            obj = Corporation.objects.get(id=id)
+            serializer = CorporationSerializer(obj)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        obj = Corporation.objects.all()
+        serializer = CorporationSerializer(obj, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    # 2. Create
+    def post(self, request, *args, **kwargs):
+        '''
+        Create the Todo with given todo data
+        '''
+        serializer = CorporationSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class UnitListApiView(APIView):
     # add permission to check if user is authenticated
     permission_classes = [permissions.IsAuthenticated]
@@ -328,7 +393,10 @@ class EmployeeListApiView(APIView):
         '''
         Create the Todo with given todo data
         '''
-        serializer = EmployeeSerializer(data=request.data)
+        corp = Corporation.objects.get(name=request.data.get('corporation_id'))
+        obj = request.POST.copy()
+        obj['corporation_id'] = corp.id
+        serializer = EmployeeSerializer(data=obj)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -360,9 +428,13 @@ class BookListApiView(APIView):
         '''
         Create the Todo with given todo data
         '''
-        ordType = OrderType.objects.get(code=request.data.get('order_type_id'))
+        ordType = RefType.objects.get(code=request.data.get('order_type_id'))
+        corpType = Corporation.objects.get(name=request.data.get('corporation_id'))
         obj = request.POST.copy()
         obj['order_type_id'] = ordType.id
+        obj['corporation_id'] = corpType.id
+        
+        
         serializer = BookSerializer(data=obj)
         if serializer.is_valid():
             serializer.save()

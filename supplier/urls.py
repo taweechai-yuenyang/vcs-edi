@@ -5,7 +5,7 @@ from . import views
 
 urlpatterns = [
     path('supplier', views.SupplierListApiView.as_view()),
-    path('order_type', views.OrderTypeListApiView.as_view()),
+    path('ref_type', views.RefTypeListApiView.as_view()),
     path('product_type', views.ProductTypeListApiView.as_view()),
     path('unit', views.UnitListApiView.as_view()),
     path('product', views.ProductListApiView.as_view()),
@@ -15,4 +15,7 @@ urlpatterns = [
     path("department", views.DepartmentListApiView.as_view()),
     path("book", views.BookListApiView.as_view()),
     path("employee", views.EmployeeListApiView.as_view()),
+    path("factory", views.FactoryListApiView.as_view()),
+    path("corporation", views.CorporationListApiView.as_view()),
+    path("position", views.PositionListApiView.as_view()),
 ]

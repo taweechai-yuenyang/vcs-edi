@@ -7,14 +7,14 @@ urlAPI = "http://localhost:8000"
 objHeader = {'Content-Type': 'application/x-www-form-urlencoded',}
 userLogIn = 'username=taweechai&password=ADSads123'
 
-# dbHost = '192.168.20.9:1433'
-# dbUser = 'fm1234'
-# dbPassword = 'x2y2'
-# dbName = 'Formula'
-# dbCharset = 'TIS-620'
-dbHost = 'localhost:1433'
-dbUser = 'sa'
-dbPassword = 'ADSads123'
+dbHost = '192.168.20.9:1433'
+dbUser = 'fm1234'
+dbPassword = 'x2y2'
+dbName = 'Formula'
+
+# dbHost = 'localhost:1433'
+# dbUser = 'sa'
+# dbPassword = 'ADSads123'
 dbName = 'Formula'
 dbCharset = 'TIS-620'
 
@@ -96,6 +96,82 @@ def sync_product_type():
         print(err)
         print(f"=========================================")
 
+def sync_factory():
+    response = requests.request("POST", f"{urlAPI}/api/token/", headers=objHeader, data=userLogIn)
+    if response.status_code == 200:
+        obj = response.json()
+        token = obj['access']
+        conn = pymssql.connect(host=dbHost, user=dbUser,password=dbPassword, charset=dbCharset, database=dbName, tds_version=r'7.0')
+        SQL_QUERY = f"""select FCCODE,FCNAME,FCNAME2 from WHOUSE"""
+        cursor = conn.cursor()
+        cursor.execute(SQL_QUERY)
+        err = []
+        i = 1
+        for r in cursor.fetchall():
+            FCCODE = str(f"{r[0]}").strip()
+            FCNAME = str(f"{r[1]}").strip()
+            FCNAME2 = str(f"{r[0]}").strip() + '-' + str(f"{r[1]}").strip()
+
+            payload = f'code={FCCODE}&name={FCNAME}&description={FCNAME2}&is_active=1'.encode(
+                'utf8')
+            headers = {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': f'Bearer {token}'}
+
+            response = requests.request(
+                "POST", f"{urlAPI}/api/factory", headers=headers, data=payload)
+
+            print(f"{i}.Sync Status Code:{response.status_code} DataID: {FCCODE}")
+            i += 1
+            # time.sleep(0.1)
+            
+        cursor.close()
+        conn.close()
+        print(f"============== Factory Type =============")
+        print(err)
+        print(f"======================================")
+        
+def sync_corporation():
+    response = requests.request("POST", f"{urlAPI}/api/token/", headers=objHeader, data=userLogIn)
+    if response.status_code == 200:
+        obj = response.json()
+        token = obj['access']
+        
+        ### Create new corporation
+        payload = f'code=-&name=ไม่ระบุ&description=-&is_active=1'.encode('utf8')
+        headers = {'Content-Type': 'application/x-www-form-urlencoded','Authorization': f'Bearer {token}'}
+        response = requests.request("POST", f"{urlAPI}/api/corporation", headers=headers, data=payload)
+            
+            
+        conn = pymssql.connect(host=dbHost, user=dbUser,password=dbPassword, charset=dbCharset, database=dbName, tds_version=r'7.0')
+        SQL_QUERY = f"""select FCCODE,FCNAME,FCNAME2 from CORP"""
+        cursor = conn.cursor()
+        cursor.execute(SQL_QUERY)
+        err = []
+        i = 1
+        for r in cursor.fetchall():
+            FCCODE = str(f"{r[0]}").strip()
+            FCNAME = str(f"{r[1]}").strip()
+            FCNAME2 = str(f"{r[0]}").strip() + '-' + str(f"{r[1]}").strip()
+
+            payload = f'code={FCCODE}&name={FCNAME}&description={FCNAME2}&is_active=1'.encode(
+                'utf8')
+            headers = {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': f'Bearer {token}'}
+
+            response = requests.request(
+                "POST", f"{urlAPI}/api/corporation", headers=headers, data=payload)
+
+            print(f"{i}.Sync Status Code:{response.status_code} DataID: {FCCODE}")
+            i += 1
+            # time.sleep(0.1)
+            
+        cursor.close()
+        conn.close()
+        print(f"============== Corporation Type =============")
+        print(err)
+        print(f"======================================")
 
 def sync_um():
     response = requests.request("POST", f"{urlAPI}/api/token/", headers=objHeader, data=userLogIn)
@@ -138,7 +214,7 @@ def sync_employee():
         obj = response.json()
         token = obj['access']
         conn = pymssql.connect(host=dbHost, user=dbUser,password=dbPassword, charset=dbCharset, database=dbName, tds_version=r'7.0')
-        SQL_QUERY = f"""select FCCODE,FCNAME,FCNAME2 from EMPL"""
+        SQL_QUERY = f"""select e.FCLOGIN,case when el.FCNAME is null then e.FCLOGIN else el.FCNAME end from EMPLR e left join EMPL el on e.FCRCODE=el.FCRCODE order by e.FCLOGIN"""
         cursor = conn.cursor()
         cursor.execute(SQL_QUERY)
         err = []
@@ -146,9 +222,9 @@ def sync_employee():
         for r in cursor.fetchall():
             FCCODE = str(f"{r[0]}").strip()
             FCNAME = str(f"{r[1]}").strip()
-            FCNAME2 = str(f"{r[2]}").strip()
+            FCCORP = str("บริษัท วี.ซี.เอส (ไทยแลนด์) จำกัด").strip()
 
-            payload = f'code={FCCODE}&name={FCNAME}&description={FCNAME2}&is_active=1'.encode(
+            payload = f'corporation_id={FCCORP}&code={FCCODE}&name={FCNAME}&description=-&is_active=1'.encode(
                 'utf8')
             headers = {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -195,7 +271,7 @@ def sync_order_type():
                 'Authorization': f'Bearer {token}'}
 
             response = requests.request(
-                "POST", f"{urlAPI}/api/order_type", headers=headers, data=payload)
+                "POST", f"{urlAPI}/api/ref_type", headers=headers, data=payload)
 
             # print(response.text)
             if response.status_code != 201:
@@ -246,7 +322,7 @@ def sync_product_group():
             
         cursor.close()
         conn.close()
-        print(f"============== Order Type =============")
+        print(f"============== Product Group =============")
         print(err)
         print(f"=======================================")
         
@@ -285,7 +361,56 @@ def sync_section():
             
         cursor.close()
         conn.close()
-        print(f"============== Order Type =============")
+        print(f"============== Section Type =============")
+        print(err)
+        print(f"=======================================")
+        
+def sync_position():
+    response = requests.request("POST", f"{urlAPI}/api/token/", headers=objHeader, data=userLogIn)
+    if response.status_code == 200:
+        obj = response.json()
+        token = obj['access']
+        ### Post Null Data
+        payload = f'code=-&name=ไม่ระบุ&description=-&is_active=1'.encode(
+                'utf8')
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': f'Bearer {token}'
+        }
+        response = requests.request(
+                "POST", f"{urlAPI}/api/position", headers=headers, data=payload)
+            
+        conn = pymssql.connect(host=dbHost, user=dbUser,password=dbPassword, charset=dbCharset, database=dbName, tds_version=r'7.0')
+        SQL_QUERY = f"""select FCCODE,FCNAME,FCNAME2 from POST"""
+        cursor = conn.cursor()
+        cursor.execute(SQL_QUERY)
+        err = []
+        i = 1
+        for r in cursor.fetchall():
+            FCCODE = str(f"{r[0]}").strip()
+            FCNAME = str(f"{r[1]}").strip()
+            FCNAME2 = str(f"{r[2]}").strip()
+
+            payload = f'code={FCCODE}&name={FCNAME}&description={FCNAME2}&is_active=1'.encode(
+                'utf8')
+            headers = {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': f'Bearer {token}'}
+
+            response = requests.request(
+                "POST", f"{urlAPI}/api/position", headers=headers, data=payload)
+
+            # print(response.text)
+            if response.status_code != 201:
+                err.append(FCCODE)
+
+            print(f"{i}.Sync Status Code:{response.status_code} DataID: {FCCODE}")
+            i += 1
+            # time.sleep(0.1)
+            
+        cursor.close()
+        conn.close()
+        print(f"============== Position Type =============")
         print(err)
         print(f"=======================================")
 
@@ -324,7 +449,7 @@ def sync_department():
             
         cursor.close()
         conn.close()
-        print(f"============== Order Type =============")
+        print(f"============== Department Type =============")
         print(err)
         print(f"=======================================")
 
@@ -334,7 +459,7 @@ def sync_book():
         obj = response.json()
         token = obj['access']
         conn = pymssql.connect(host=dbHost, user=dbUser,password=dbPassword, charset=dbCharset, database=dbName, tds_version=r'7.0')
-        SQL_QUERY = f"""select FCSKID,FCREFTYPE,FCCODE,FCNAME,FCNAME2,RTRIM(FCPREFIX) from BOOK order by FCREFTYPE,FCCODE"""
+        SQL_QUERY = f"""select b.FCSKID,b.FCREFTYPE,b.FCCODE,RTRIM(b.FCNAME),RTRIM(b.FCNAME2),RTRIM(b.FCPREFIX),RTRIM(c.FCNAME) from BOOK b inner join CORP c on b.FCCORP=c.FCSKID order by b.FCREFTYPE,b.FCCODE"""
         cursor = conn.cursor()
         cursor.execute(SQL_QUERY)
         err = []
@@ -346,8 +471,9 @@ def sync_book():
             FCNAME = str(f"{r[3]}").strip()
             FCNAME2 = str(f"{r[4]}").strip()
             FCPREFIX = str(f"{r[5]}")
+            FCCORP = str(f"{r[6]}").strip()
             
-            payload = f'skid={FCSKID}{FCREFTYPE}{FCCODE}&order_type_id={FCREFTYPE}&code={FCCODE}&name={FCNAME}&description={FCNAME2}&prefix={FCPREFIX}&is_active=1'.encode(
+            payload = f'skid={FCSKID}{FCREFTYPE}{FCCODE}&corporation_id={FCCORP}&order_type_id={FCREFTYPE}&code={FCCODE}&name={FCNAME}&description={FCNAME2}&prefix={FCPREFIX}&is_active=1'.encode(
                 'utf8')
             headers = {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -366,10 +492,51 @@ def sync_book():
             
         cursor.close()
         conn.close()
-        print(f"============== Order Type =============")
+        print(f"============== Book Type =============")
         print(err)
         print(f"=======================================")
 
+# def sync_book_detail():
+#     response = requests.request("POST", f"{urlAPI}/api/token/", headers=objHeader, data=userLogIn)
+#     if response.status_code == 200:
+#         obj = response.json()
+#         token = obj['access']
+#         conn = pymssql.connect(host=dbHost, user=dbUser,password=dbPassword, charset=dbCharset, database=dbName, tds_version=r'7.0')
+#         SQL_QUERY = f"""select FCSKID,FCREFTYPE,FCCODE,FCNAME,FCNAME2,RTRIM(FCPREFIX) from BOOK order by FCREFTYPE,FCCODE"""
+#         cursor = conn.cursor()
+#         cursor.execute(SQL_QUERY)
+#         err = []
+#         i = 1
+#         for r in cursor.fetchall():
+#             FCSKID = str(f"{r[0]}").strip()
+#             FCREFTYPE = str(f"{r[1]}").strip()
+#             FCCODE = str(f"{r[2]}").strip()
+#             FCNAME = str(f"{r[3]}").strip()
+#             FCNAME2 = str(f"{r[4]}").strip()
+#             FCPREFIX = str(f"{r[5]}")
+            
+#             payload = f'skid={FCSKID}{FCREFTYPE}{FCCODE}&order_type_id={FCREFTYPE}&code={FCCODE}&name={FCNAME}&description={FCNAME2}&prefix={FCPREFIX}&is_active=1'.encode(
+#                 'utf8')
+#             headers = {
+#                 'Content-Type': 'application/x-www-form-urlencoded',
+#                 'Authorization': f'Bearer {token}'}
+
+#             response = requests.request(
+#                 "POST", f"{urlAPI}/api/book", headers=headers, data=payload)
+
+#             # print(response.text)
+#             if response.status_code != 201:
+#                 err.append(FCCODE)
+
+#             print(f"{i}.Sync Status Code:{response.status_code} DataID: {FCCODE}")
+#             i += 1
+#             # time.sleep(0.1)
+            
+#         cursor.close()
+#         conn.close()
+#         print(f"============== Book Detail Type =============")
+#         print(err)
+#         print(f"=======================================")
 
 def sync_product():
     response = requests.request("POST", f"{urlAPI}/api/token/", headers=objHeader, data=userLogIn)
@@ -426,6 +593,8 @@ def sync_product():
 
 if __name__ == "__main__":
     sync_supplier()
+    sync_factory()
+    sync_corporation()
     sync_employee()
     sync_product_type()
     sync_um()
@@ -433,5 +602,7 @@ if __name__ == "__main__":
     sync_product_group()
     sync_section()
     sync_department()
+    sync_position()
     sync_book()
+    # sync_book_detail()
     sync_product()

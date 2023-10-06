@@ -5,7 +5,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group
 from django.forms import ModelForm
 
-from .models import (Book, Department, Employee, ManagementUser, OrderType, Product,
+from .models import (Book, Corporation, Department, Employee, Factory, ManagementUser, RefType, Product,
                      ProductGroup, ProductType, Section, Position, Supplier, Unit)
 
 # # Register your models here.
@@ -159,6 +159,62 @@ class UnitAdmin(admin.ModelAdmin):
         return obj.updated_on.strftime("%d-%m-%Y %H:%M:%S")
     pass
 
+class CorporationAdmin(admin.ModelAdmin):
+    list_display = (
+        'code',
+        'name',
+        'description',
+        'is_active',
+        'created_at',
+        'updated_at',
+    )
+    
+    search_fields = (
+        'code',
+        'name',
+    )
+    
+    list_filter = ('is_active',)
+    
+    # ordering = ("code","name",)
+    list_per_page = 25
+    
+    def created_at(self, obj):
+        return obj.created_on.strftime("%d-%m-%Y %H:%M:%S")
+    
+    def updated_at(self, obj):
+        # return obj.updated_on.strftime("%d %b %Y %H:%M:%S")
+        return obj.updated_on.strftime("%d-%m-%Y %H:%M:%S")
+    pass
+
+class FactoryAdmin(admin.ModelAdmin):
+    list_display = (
+        'code',
+        'name',
+        'description',
+        'is_active',
+        'created_at',
+        'updated_at',
+    )
+    
+    search_fields = (
+        'code',
+        'name',
+    )
+    
+    list_filter = ('is_active',)
+    
+    # ordering = ("code","name",)
+    list_per_page = 25
+    
+    def created_at(self, obj):
+        return obj.created_on.strftime("%d-%m-%Y %H:%M:%S")
+    
+    def updated_at(self, obj):
+        # return obj.updated_on.strftime("%d %b %Y %H:%M:%S")
+        return obj.updated_on.strftime("%d-%m-%Y %H:%M:%S")
+    pass
+
 class ProductAdmin(admin.ModelAdmin):
     list_display = (
         'prod_type_id',
@@ -187,7 +243,7 @@ class ProductAdmin(admin.ModelAdmin):
         return obj.updated_on.strftime("%d-%m-%Y %H:%M:%S")
     pass
 
-class OrderTypeAdmin(admin.ModelAdmin):
+class RefTypeAdmin(admin.ModelAdmin):
     list_display = (
         'code',
         'name',
@@ -402,9 +458,11 @@ class ManagementUserAdmin(UserAdmin):
 
 admin.site.register(Supplier, SupplierAdmin)
 admin.site.register(ProductType, ProductTypeAdmin)
+admin.site.register(Corporation, CorporationAdmin)
+admin.site.register(Factory, FactoryAdmin)
 admin.site.register(Unit, UnitAdmin)
 admin.site.register(Product, ProductAdmin)
-admin.site.register(OrderType, OrderTypeAdmin)
+admin.site.register(RefType, RefTypeAdmin)
 admin.site.register(Book, BookAdmin)
 admin.site.register(Position, PositionAdmin)
 admin.site.register(Section, SectionAdmin)

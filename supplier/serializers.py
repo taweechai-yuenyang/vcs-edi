@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Book, Department, Employee, Position, ProductGroup, Section, Supplier, OrderType, ProductType, Product, Unit
+from .models import Book, Corporation, Department, Employee, Factory, Position, ProductGroup, Section, Supplier, RefType, ProductType, Product, Unit
 
 
 class SupplierSerializer(serializers.ModelSerializer):
@@ -7,9 +7,9 @@ class SupplierSerializer(serializers.ModelSerializer):
         model = Supplier
         fields = ('id','user_id','code','name','description','is_active','created_on','updated_on',)
         
-class OrderTypeSerializer(serializers.ModelSerializer):
+class RefTypeSerializer(serializers.ModelSerializer):
     class Meta:
-        model = OrderType
+        model = RefType
         fields = ('id','code','name','description','is_active','created_on','updated_on',)
         
 class ProductTypeSerializer(serializers.ModelSerializer):
@@ -20,6 +20,21 @@ class ProductTypeSerializer(serializers.ModelSerializer):
 class ProductGroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductGroup
+        fields = ('id','code','name','description','is_active','created_on','updated_on',)
+        
+class CorporationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Corporation
+        fields = ('id','code','name','description','is_active','created_on','updated_on',)
+        
+class PositionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Position
+        fields = ('id','code','name','description','is_active','created_on','updated_on',)
+        
+class FactorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Factory
         fields = ('id','code','name','description','is_active','created_on','updated_on',)
         
 class UnitSerializer(serializers.ModelSerializer):
@@ -45,12 +60,12 @@ class DepartmentSerializer(serializers.ModelSerializer):
 class EmployeeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Employee
-        fields = ('id','code','name','description','is_active','created_on','updated_on',)
+        fields = ('id','corporation_id','code','name','description','is_active','created_on','updated_on',)
         
 class BookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
-        fields = ('id','skid','order_type_id','code','name','prefix','description','is_active','created_on','updated_on',)
+        fields = ('id','skid', 'corporation_id', 'order_type_id','code','name','prefix','description','is_active','created_on','updated_on',)
         
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:

@@ -10,7 +10,7 @@ import nanoid
 import pandas as pd
 from formula_vcst.models import BOOK, COOR, DEPT, EMPLOYEE, PROD, SECT, UM, NoteCut, OrderH, OrderI
 
-from supplier.models import Book, OrderType, Product, ProductGroup
+from supplier.models import Book, RefType, Product, ProductGroup
 from .models import EDI_REQUEST_ORDER_STATUS, PURCHASE_ORDER_STATUS, PurchaseOrder, PurchaseOrderDetail, PurchaseRequest, PurchaseRequestDetail, RequestOrder, RequestOrderDetail, UploadEDI
 # from .models import UploadEDI, PurchaseRequest, PurchaseOrder, RequestOrder
 
@@ -57,7 +57,7 @@ class UploadEDIAdmin(admin.ModelAdmin):
             # Set Section From User
             obj.section_id = request.user.section_id
             # Set Book From Default
-            ordType = OrderType.objects.get(code=r"PR")
+            ordType = RefType.objects.get(code=r"PR")
             book = Book.objects.get(order_type_id=ordType, code=r'0002')
             obj.book_id = book
             # Set upload_by_id
