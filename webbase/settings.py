@@ -11,8 +11,12 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 import datetime
+import os
 from pathlib import Path
 from import_export.formats.base_formats import XLSX
+from dotenv import load_dotenv
+load_dotenv()
+
 IMPORT_EXPORT_FORMATS = [XLSX]
 
 # Build paths inside the project like this: BASE_DIR / "subdir".
@@ -84,6 +88,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "webbase.wsgi.application"
 
+print(os.environ.get('EDI_HOSTNAME'))
+
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
@@ -104,14 +110,11 @@ WSGI_APPLICATION = "webbase.wsgi.application"
 DATABASES = {
     'default': {
         'ENGINE': 'mssql',
-        'NAME': 'EDI',
-        # 'USER': 'fm1234',
-        # 'PASSWORD': 'x2y2',
-        # 'HOST': '192.168.20.9',
-        'USER': 'sa',
-        'PASSWORD': 'ADSads123',
-        'HOST': 'localhost',
-        'PORT': '1433',
+        'NAME': os.environ.get('EDI_DBNAME'),
+        'USER': os.environ.get('EDI_USERNAME'),
+        'PASSWORD': os.environ.get('EDI_PASSWORD'),
+        'HOST': os.environ.get('EDI_HOSTNAME'),
+        'PORT': os.environ.get('EDI_PORT'),
         "Trusted_Connection": "no",
         "OPTIONS": {
             "driver": "ODBC Driver 17 for SQL Server",

@@ -1,7 +1,9 @@
 import pymssql
-import time
 import requests
-import json
+import os
+
+from dotenv import load_dotenv
+load_dotenv()
 
 urlAPI = "http://localhost:8000"
 objHeader = {'Content-Type': 'application/x-www-form-urlencoded',}
@@ -12,10 +14,9 @@ userLogIn = 'username=taweechai&password=ADSads123'
 # dbPassword = 'x2y2'
 # dbName = 'Formula'
 
-dbHost = 'localhost:1433'
-dbUser = 'sa'
-dbPassword = 'ADSads123'
-dbName = 'Formula'
+dbHost = f"{os.environ.get('FORMULA_HOSTNAME')}:{os.environ.get('FORMULA_PORT')}"
+dbPassword = os.environ.get('FORMULA_PASSWORD')
+dbName = os.environ.get('FORMULA_USERNAME')
 dbCharset = 'TIS-620'
 
 
