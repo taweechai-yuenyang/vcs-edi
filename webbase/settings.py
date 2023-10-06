@@ -372,6 +372,8 @@ JAZZMIN_SETTINGS = {
         "supplier.Department": "fas fa-id-card",
         "supplier.Book": "fas fa-book",
         "supplier.ManagementUser": "fas fa-user-friends",
+        "supplier.Factory": "fas fa-warehouse",
+        "supplier.Corporation": "fas fa-building",
         "upload_edi.UploadEDI": "fas fa-upload",
         'upload_edi.RequestOrder': "fas fa-tasks",
         'upload_edi.PurchaseRequest': "fas fa-money-check",
