@@ -12,6 +12,7 @@ diff-match-patch==20230430
 Django==4.2.5
 django-admin-confirm==1.0.0
 django-admin-extra-buttons==1.5.6
+django-admin-shortcuts==2.1.1
 django-allauth==0.57.0
 django-import-export==3.3.1
 django-jazzmin==2.6.0
