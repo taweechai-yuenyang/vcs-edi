@@ -88,7 +88,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "webbase.wsgi.application"
 
-print(os.environ.get('EDI_HOSTNAME'))
+# print(os.environ.get('EDI_HOSTNAME'))
 
 
 # Database
