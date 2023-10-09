@@ -5,7 +5,7 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-urlAPI = "http://localhost:8000"
+urlAPI = os.environ.get('WEB_API')
 objHeader = {'Content-Type': 'application/x-www-form-urlencoded',}
 userLogIn = 'username=taweechai&password=ADSads123'
 
