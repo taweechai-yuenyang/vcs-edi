@@ -9,15 +9,15 @@ urlAPI = os.environ.get('WEB_API')
 objHeader = {'Content-Type': 'application/x-www-form-urlencoded',}
 userLogIn = 'username=taweechai&password=ADSads123'
 
-# dbHost = '192.168.20.9:1433'
-# dbUser = 'fm1234'
-# dbPassword = 'x2y2'
-# dbName = 'Formula'
+dbHost = '192.168.20.9:1433'
+dbUser = 'fm1234'
+dbPassword = 'x2y2'
+dbName = 'Formula'
 
-dbHost = f"{os.environ.get('FORMULA_HOSTNAME')}:{os.environ.get('FORMULA_PORT')}"
-dbUser =  os.environ.get('FORMULA_USERNAME')
-dbPassword = os.environ.get('FORMULA_PASSWORD')
-dbName = os.environ.get('FORMULA_USERNAME')
+# dbHost = f"{os.environ.get('FORMULA_HOSTNAME')}:{os.environ.get('FORMULA_PORT')}"
+# dbUser =  os.environ.get('FORMULA_USERNAME')
+# dbPassword = os.environ.get('FORMULA_PASSWORD')
+# dbName = os.environ.get('FORMULA_USERNAME')
 dbCharset = 'TIS-620'
 
 
@@ -47,6 +47,11 @@ def sync_supplier():
 
             # print(response.text)
             if response.status_code != 201:
+                if response.status_code == 401:
+                    response = requests.request("POST", f"{urlAPI}/api/token/", headers=objHeader, data=userLogIn)
+                    obj = response.json()
+                    token = obj['access']
+                    
                 err.append(FCSKID)
 
             print(f"{i}.Sync Status Code:{response.status_code} DataID: {FCSKID}")
@@ -86,6 +91,11 @@ def sync_product_type():
 
             # print(response.text)
             if response.status_code != 201:
+                if response.status_code == 401:
+                    response = requests.request("POST", f"{urlAPI}/api/token/", headers=objHeader, data=userLogIn)
+                    obj = response.json()
+                    token = obj['access']
+                    
                 err.append(FCCODE)
 
             print(f"{i}.Sync Status Code:{response.status_code} DataID: {FCCODE}")
@@ -122,6 +132,11 @@ def sync_factory():
 
             response = requests.request(
                 "POST", f"{urlAPI}/api/factory", headers=headers, data=payload)
+            
+            if response.status_code == 401:
+                    response = requests.request("POST", f"{urlAPI}/api/token/", headers=objHeader, data=userLogIn)
+                    obj = response.json()
+                    token = obj['access']
 
             print(f"{i}.Sync Status Code:{response.status_code} DataID: {FCCODE}")
             i += 1
@@ -164,6 +179,11 @@ def sync_corporation():
 
             response = requests.request(
                 "POST", f"{urlAPI}/api/corporation", headers=headers, data=payload)
+            
+            if response.status_code == 401:
+                    response = requests.request("POST", f"{urlAPI}/api/token/", headers=objHeader, data=userLogIn)
+                    obj = response.json()
+                    token = obj['access']
 
             print(f"{i}.Sync Status Code:{response.status_code} DataID: {FCCODE}")
             i += 1
@@ -199,7 +219,12 @@ def sync_um():
 
             response = requests.request(
                 "POST", f"{urlAPI}/api/unit", headers=headers, data=payload)
-
+            
+            if response.status_code == 401:
+                    response = requests.request("POST", f"{urlAPI}/api/token/", headers=objHeader, data=userLogIn)
+                    obj = response.json()
+                    token = obj['access']
+                    
             print(f"{i}.Sync Status Code:{response.status_code} DataID: {FCCODE}")
             i += 1
             # time.sleep(0.1)
@@ -237,6 +262,10 @@ def sync_employee():
 
             # print(response.text)
             if response.status_code != 201:
+                if response.status_code == 401:
+                    response = requests.request("POST", f"{urlAPI}/api/token/", headers=objHeader, data=userLogIn)
+                    obj = response.json()
+                    token = obj['access']
                 err.append(FCCODE)
 
             print(f"{i}.Sync Status Code:{response.status_code} DataID: {FCCODE}")
@@ -277,6 +306,10 @@ def sync_order_type():
 
             # print(response.text)
             if response.status_code != 201:
+                if response.status_code == 401:
+                    response = requests.request("POST", f"{urlAPI}/api/token/", headers=objHeader, data=userLogIn)
+                    obj = response.json()
+                    token = obj['access']
                 err.append(FCCODE)
 
             print(f"{i}.Sync Status Code:{response.status_code} DataID: {FCCODE}")
@@ -316,6 +349,10 @@ def sync_product_group():
 
             # print(response.text)
             if response.status_code != 201:
+                if response.status_code == 401:
+                    response = requests.request("POST", f"{urlAPI}/api/token/", headers=objHeader, data=userLogIn)
+                    obj = response.json()
+                    token = obj['access']
                 err.append(FCCODE)
 
             print(f"{i}.Sync Status Code:{response.status_code} DataID: {FCCODE}")
@@ -355,6 +392,10 @@ def sync_section():
 
             # print(response.text)
             if response.status_code != 201:
+                if response.status_code == 401:
+                    response = requests.request("POST", f"{urlAPI}/api/token/", headers=objHeader, data=userLogIn)
+                    obj = response.json()
+                    token = obj['access']
                 err.append(FCCODE)
 
             print(f"{i}.Sync Status Code:{response.status_code} DataID: {FCCODE}")
@@ -404,6 +445,10 @@ def sync_position():
 
             # print(response.text)
             if response.status_code != 201:
+                if response.status_code == 401:
+                    response = requests.request("POST", f"{urlAPI}/api/token/", headers=objHeader, data=userLogIn)
+                    obj = response.json()
+                    token = obj['access']
                 err.append(FCCODE)
 
             print(f"{i}.Sync Status Code:{response.status_code} DataID: {FCCODE}")
@@ -443,6 +488,10 @@ def sync_department():
 
             # print(response.text)
             if response.status_code != 201:
+                if response.status_code == 401:
+                    response = requests.request("POST", f"{urlAPI}/api/token/", headers=objHeader, data=userLogIn)
+                    obj = response.json()
+                    token = obj['access']
                 err.append(FCCODE)
 
             print(f"{i}.Sync Status Code:{response.status_code} DataID: {FCCODE}")
@@ -486,6 +535,11 @@ def sync_book():
 
             # print(response.text)
             if response.status_code != 201:
+                if response.status_code == 401:
+                    response = requests.request("POST", f"{urlAPI}/api/token/", headers=objHeader, data=userLogIn)
+                    obj = response.json()
+                    token = obj['access']
+                    
                 err.append(FCCODE)
 
             print(f"{i}.Sync Status Code:{response.status_code} DataID: {FCCODE}")
