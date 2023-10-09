@@ -15,6 +15,7 @@ userLogIn = 'username=taweechai&password=ADSads123'
 # dbName = 'Formula'
 
 dbHost = f"{os.environ.get('FORMULA_HOSTNAME')}:{os.environ.get('FORMULA_PORT')}"
+dbUser =  os.environ.get('FORMULA_USERNAME')
 dbPassword = os.environ.get('FORMULA_PASSWORD')
 dbName = os.environ.get('FORMULA_USERNAME')
 dbCharset = 'TIS-620'
