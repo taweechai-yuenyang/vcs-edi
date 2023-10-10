@@ -81,7 +81,8 @@ class RequestOrder(models.Model):
     ro_by_id = models.ForeignKey(ManagementUser, verbose_name="Request By ID", blank=True, null=True, on_delete=models.SET_NULL)
     ro_status = models.CharField(max_length=1, choices=EDI_REQUEST_ORDER_STATUS,verbose_name="Request Status", default="0")
     ref_formula_id = models.CharField(max_length=8, verbose_name="Ref. Formula ID", blank=True, null=True)
-    is_sync = models.BooleanField(verbose_name="Is Sync", default=False)
+    is_sync = models.BooleanField(verbose_name="Is Sync", default=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -104,8 +105,9 @@ class RequestOrderDetail(models.Model):
     request_by_id = models.ForeignKey(ManagementUser, verbose_name="Request By ID", blank=True, null=True, on_delete=models.SET_NULL)
     request_status = models.CharField(max_length=1, choices=EDI_REQUEST_ORDER_STATUS,verbose_name="Request Status", default="0")
     remark = models.TextField(verbose_name="Remark", blank=True, null=True)
-    is_selected = models.BooleanField(verbose_name="Is Selected", default=True)
-    is_sync = models.BooleanField(verbose_name="Is Sync", default=False)
+    is_selected = models.BooleanField(verbose_name="Is Selected", default=False)
+    is_sync = models.BooleanField(verbose_name="Is Sync", default=True)
+
     ref_formula_id = models.CharField(max_length=8, verbose_name="Ref. Formula ID", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -218,7 +220,8 @@ class PurchaseOrder(models.Model):
     qty = models.FloatField(verbose_name="Qty.", default="0.0")
     order_status = models.CharField(max_length=1, choices=PURCHASE_ORDER_STATUS,verbose_name="Order Status", default="0")
     description = models.TextField(verbose_name="Description", default="-", blank=True, null=True)
-    is_sync = models.BooleanField(verbose_name="Is Sync", default=False)
+    is_sync = models.BooleanField(verbose_name="Is Sync", default=True)
+
     created_by_id = models.ForeignKey(ManagementUser, verbose_name="Created By ID", blank=True, null=True, on_delete=models.SET_NULL)
     ref_formula_id = models.CharField(max_length=8, verbose_name="Ref. Formula ID", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -242,7 +245,8 @@ class PurchaseOrderDetail(models.Model):
     qty = models.FloatField(verbose_name="Qty.", default="0.0")
     remark = models.TextField(verbose_name="Remark", blank=True, null=True)
     is_active = models.BooleanField(verbose_name="Is Active", default=False)
-    is_sync = models.BooleanField(verbose_name="Is Sync", default=False)
+    is_sync = models.BooleanField(verbose_name="Is Sync", default=True)
+
     created_by_id = models.ForeignKey(ManagementUser, verbose_name="Created By ID", blank=True, null=True, on_delete=models.SET_NULL)
     ref_formula_id = models.CharField(max_length=8, verbose_name="Ref. Formula ID", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
