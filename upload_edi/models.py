@@ -34,6 +34,13 @@ PURCHASE_ORDER_STATUS = [
     ('3', 'Failure'),
 ]
 
+EDI_MG_STATUS = [
+    ('0', 'Draff'),
+    ('1', 'Approve'),
+    ('2', 'Reject'),
+    ('3', 'Failure'),
+]
+
 # Create your models here.
 class UploadEDI(models.Model):
     id = models.UUIDField(primary_key=True, editable=False, verbose_name="PRIMARY KEY", default=uuid.uuid4)
@@ -122,7 +129,7 @@ class ApproveRequestOrder(models.Model):
     request_order_id = models.ForeignKey(RequestOrder, verbose_name="Request ID", blank=False, null=False, on_delete=models.CASCADE)
     request_by_id = models.ForeignKey(ManagementUser, verbose_name="Request By ID", blank=True, null=True, on_delete=models.SET_NULL)
     description = models.TextField(verbose_name="Description", blank=True, null=True)
-    request_status = models.CharField(max_length=1, choices=EDI_REQUEST_ORDER_STATUS,verbose_name="Request Status", default="0")
+    request_status = models.CharField(max_length=1, choices=EDI_MG_STATUS,verbose_name="Request Status", default="0")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -191,7 +198,7 @@ class ApprovePurchaseRequest(models.Model):
     request_order_id = models.ForeignKey(PurchaseRequest, verbose_name="Purchase Request ID", blank=False, null=False, on_delete=models.CASCADE)
     approve_by_id = models.ForeignKey(ManagementUser, verbose_name="Approve By ID", blank=True, null=True, on_delete=models.SET_NULL)
     description = models.TextField(verbose_name="Description", blank=True, null=True)
-    purchase_request_status = models.CharField(max_length=1, choices=PURCHASE_STATUS,verbose_name="Purchase Request Status", default="0")
+    purchase_request_status = models.CharField(max_length=1, choices=EDI_MG_STATUS,verbose_name="Purchase Request Status", default="0")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -255,7 +262,7 @@ class ApprovePurchaseOrder(models.Model):
     purchase_order_id = models.ForeignKey(PurchaseOrder, verbose_name="Purchase Request ID", blank=False, null=False, on_delete=models.CASCADE)
     approve_by_id = models.ForeignKey(ManagementUser, verbose_name="Approve By ID", blank=True, null=True, on_delete=models.SET_NULL)
     description = models.TextField(verbose_name="Description", blank=True, null=True)
-    purchase_request_status = models.CharField(max_length=1, choices=PURCHASE_ORDER_STATUS, verbose_name="Purchase Order Status", default="0")
+    purchase_request_status = models.CharField(max_length=1, choices=EDI_MG_STATUS, verbose_name="Purchase Order Status", default="0")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     

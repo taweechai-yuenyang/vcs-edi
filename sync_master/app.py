@@ -14,7 +14,7 @@ dbUser = 'fm1234'
 dbPassword = 'x2y2'
 dbName = 'Formula'
 
-# dbHost = f"{os.environ.get('FORMULA_HOSTNAME')}:{os.environ.get('FORMULA_PORT')}"
+# dbHost = str(os.environ.get('FORMULA_HOSTNAME')).strip()+":"+str(os.environ.get('FORMULA_PORT')).strip()
 # dbUser =  os.environ.get('FORMULA_USERNAME')
 # dbPassword = os.environ.get('FORMULA_PASSWORD')
 # dbName = os.environ.get('FORMULA_USERNAME')

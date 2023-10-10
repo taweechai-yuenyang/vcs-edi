@@ -88,8 +88,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "webbase.wsgi.application"
 
-# print(os.environ.get('EDI_HOSTNAME'))
-
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
